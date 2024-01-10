@@ -8,20 +8,20 @@
 #                    Code files and ROM name                   #
 ################################################################
 
-BUILDDIR = build
+BUILDDIR    = build
 ASMFILES    = asm/entry.s asm/rom_header.s
-ASMOBJECTS  =	$(ASMFILES:%.s=${BUILDDIR}/%.o)
-CODECFILES  = nuboot.c main.c graphic.c helper.c scene.c sausage64.c
+ASMOBJECTS  = $(ASMFILES:%.s=${BUILDDIR}/%.o)
+CODECFILES  = main.c graphic.c helper.c scene.c sausage64.c
 CODEHFILES  =
 
 DEBUGFILES = debug.c usb.c
 
-ELF		= ${BUILDDIR}/sausage.elf
-TARGETS	= ${BUILDDIR}/sausage.z64
-MAP		= ${BUILDDIR}/sausage.map
+ELF		= ${BUILDDIR}/game.elf
+TARGETS	= ${BUILDDIR}/game.z64
+MAP		= ${BUILDDIR}/game.map
 
-LD_SCRIPT	= sausage.ld
-CP_LD_SCRIPT	= ${BUILDDIR}/sausage_cp.ld
+LD_SCRIPT	 = game.ld
+CP_LD_SCRIPT = ${BUILDDIR}/game_cp.ld
 
 
 ################################################################
@@ -30,13 +30,19 @@ CP_LD_SCRIPT	= ${BUILDDIR}/sausage_cp.ld
 
 NUSYSINC  = /usr/include/n64/nusys
 NUSYSLIB  = /usr/lib/n64/nusys
-#NUOBJ		= $(NUSYSLIB)/nusys_rom.o
+NUOBJ	  = $(NUSYSLIB)/nusys.o
+
 
 ################################################################
 #                         Make Commands                        #
 ################################################################
 
 default: $(TARGETS)
+
+clean: extraclean
+
+extraclean:
+	rm -rf $(BUILDDIR)
 
 
 ################################################################
@@ -63,7 +69,7 @@ ifeq ($(DEBUG_MODE), 0)
     MAKEROMFLAGS    = 
 else
     CODEOBJECTS     = $(CODECFILES:%.c=${BUILDDIR}/%.o) $(NUOBJ) $(DEBUGFILES:%.c=${BUILDDIR}/%.o)
-    OPTIMIZER       = -g
+    OPTIMIZER       = -g -O0
     LCDEFS          = -DDEBUG  -DF3DEX_GBI_2
     N64LIB          = -lnusys_d -lultra_d
     MAKEROMFLAGS    = -d
@@ -74,10 +80,10 @@ endif
 #                        Linker Settings                       #
 ################################################################
 
-LCINCS =	-I. -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
-LCOPTS =	-G 0
-LDIRT  =	$(ELF) $(CP_LD_SCRIPT) $(TARGETS) $(MAP) $(ASMOBJECTS)
-LDFLAGS=	$(MKDEPOPT) -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) $(N64LIB) -L$(N64_LIBGCCDIR) -lgcc -lnustd
+LCINCS  = -I. -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
+LCOPTS  = -G 0
+LDIRT   = $(ELF) $(CP_LD_SCRIPT) $(TARGETS) $(MAP) $(ASMOBJECTS)
+LDFLAGS = $(MKDEPOPT) -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) $(N64LIB) -L$(N64_LIBGCCDIR) -lgcc -lnustd -g
 
 
 ################################################################
@@ -86,7 +92,7 @@ LDFLAGS=	$(MKDEPOPT) -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) $(N64L
 
 include $(COMMONRULES)
 
-.s.o: | ${BUILDDIR}
+.s.o:
 	$(AS) -Wa,-Iasm -o $@ $<
 
 ${BUILDDIR}/asm/%.o: asm/%.s | ${BUILDDIR}

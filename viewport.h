@@ -1,9 +1,11 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
 
+/* VIEWPORT.H
+here are all the structures and functions prototypes that involve the setting up of the viewport */
 
 
-// scene structs
+// structures
 
 typedef struct {
 	
@@ -11,7 +13,7 @@ typedef struct {
 
 	u16 normal;
 	Mtx projection;
-	Mtx pos_mtx;
+	Mtx position_mtx;
 
 	float distance_from_target;
 	float horizontal_distance_from_target;
@@ -30,16 +32,28 @@ typedef struct{
 
     Light amb;
     Light dir;
+	float angle[3];
 	
 }LightData;
+
+
+// functions prototypes
 
 void move_viewport_stick(Viewport *viewport, NUContData cont[1]);
 
 void set_viewport_position(Viewport *viewport, Entity entity);
 
 
-void move_viewport_stick(Viewport *viewport, NUContData cont[1]){
 
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
+/* move_viewport_stick
+changes the viewport variables depending on controller input*/
+
+void move_viewport_stick(Viewport *viewport, NUContData cont[1])
+{
     if (fabs(cont->stick_x) < 7) cont->stick_x = 0;
     if (fabs(cont->stick_y) < 7) cont->stick_y = 0;
 
@@ -53,20 +67,26 @@ void move_viewport_stick(Viewport *viewport, NUContData cont[1]){
     if (viewport->pitch < -85) viewport->pitch = -85;
 }
 
+/*set_viewport_position
+calculates the viewport position given the input controlled variables*/
 
-void set_viewport_position(Viewport *viewport, Entity entity){
-
+void set_viewport_position(Viewport *viewport, Entity target)
+{
     viewport->horizontal_distance_from_target = viewport->distance_from_target * cosf(rad(viewport->pitch));
 	viewport->vertical_distance_from_target = viewport->distance_from_target * sinf(rad(viewport->pitch));
 
-    viewport->position[0] = entity.position[0] - viewport->horizontal_distance_from_target * sinf(rad(viewport->angle_around_target));
-    viewport->position[1] = entity.position[1] - viewport->horizontal_distance_from_target * cosf(rad(viewport->angle_around_target));
-    viewport->position[2] = viewport->vertical_distance_from_target + entity.position[2];
+    viewport->position[0] = target.position[0] - viewport->horizontal_distance_from_target * sinf(rad(viewport->angle_around_target));
+    viewport->position[1] = target.position[1] - viewport->horizontal_distance_from_target * cosf(rad(viewport->angle_around_target));
+    viewport->position[2] = viewport->vertical_distance_from_target + target.position[2];
 	
-	viewport->target[0] = entity.position[0];
-	viewport->target[1] = entity.position[1];
-	viewport->target[2] = entity.position[2] + 70;
+	viewport->target[0] = target.position[0];
+	viewport->target[1] = target.position[1];
+	viewport->target[2] = target.position[2] + 70;
 
+    //this makes the camera collide with an horizontal plane at height 0 simulating the floor
+    //will be removed when camera collision happens
+	if (viewport->position[2] < 0)  viewport->position[2] = 0;
 }
+
 
 #endif

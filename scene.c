@@ -1,8 +1,5 @@
-/***************************************************************
-                           scene.c
-                               
-Handles the first level of the game.
-***************************************************************/
+/*SCENE.C
+handles the demo scene */
 
 #include <nusys.h>
 #include <string.h> // Needed for CrashSDK compatibility
@@ -14,91 +11,80 @@ Handles the first level of the game.
 #include "nickTex.h"
 #include "nickMdl.h"
 
-
 #include "math_util.h"
 #include "time.h"
 #include "entity.h"
 #include "viewport.h"
 
 
-/*********************************
-              Macros
-*********************************/
+// macros
 
 #define USB_BUFFER_SIZE 256
 
 
-/*********************************
-        Function Prototypes
-*********************************/
+// function prototypes
 
 void nick_animcallback(u16 anim);
 
+void set_viewport(Viewport *viewport);
+
 void set_light();
 
-void set_viewport(Viewport *viewport, Entity entity);
+void set_entity (Entity *entity);
 
-
-/*********************************
-             Globals
-*********************************/
-
+// globals
 
 Viewport viewport = {
-
     distance_from_target: 300,
     angle_around_target: 0,
     pitch: 10, 
 };
 
 Entity player = {
-
-    position: { 0, 0, 0},
+    scale: 1,
 };
 
 // Lights
-static Light light_amb;
-static Light light_dir;
+
+LightData light = {
+    angle: { 60, 60, 60},
+};
 
 // nick
+
 Mtx nickMtx[MESHCOUNT_nick];
-s64ModelHelper nick;
-float nick_animspeed;
+float animspeed;
 
 
-/*==============================
-    scene_init
-    Initialize the stage
-==============================*/
+/* scene_init
+initializes the elements of the scene that require function calling */
 
 void scene_init(void)
 {
     // Initialize nick
-    sausage64_initmodel(&nick, MODEL_nick, nickMtx);
-    sausage64_set_anim(&nick, ANIMATION_nick_walk_left); 
-    sausage64_set_animcallback(&nick, nick_animcallback);
+    sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
+    sausage64_set_anim(&player.model, ANIMATION_nick_walk_left); 
+    sausage64_set_animcallback(&player.model, nick_animcallback);
     
     // Set nick's animation speed based on region
     #if TV_TYPE == PAL
-        nick_animspeed = 0.66;
+        animspeed = 0.66;
     #else
-        nick_animspeed = 0.5;
+        animspeed = 0.5;
     #endif
     
 }
 
 
-/*==============================
-    scene_update
-    Update stage variables every frame
-==============================*/
+/* scene_update
+handles the elements that modify the scene state */
 
 void scene_update()
 {
     int i; 
     
     // Advance nick's animation
-    sausage64_advance_anim(&nick, nick_animspeed);
+    sausage64_advance_anim(&player.model, animspeed);
     
     
     /* -------- Controller -------- */
@@ -108,28 +94,46 @@ void scene_update()
     nuContDataGetEx(contdata, 1);
 
     move_viewport_stick(&viewport, contdata);
+
+    set_viewport_position(&viewport, player);
     
 }
 
 
-void set_viewport(Viewport *viewport, Entity player){
+/* nick_animcallback
+Called before an animation finishes
+@param The animation that is finishing */
 
-    set_viewport_position(viewport, player);
+void nick_animcallback(u16 anim)
+{
+    switch(anim)
+    {
+        case ANIMATION_nick_run_to_roll_left:
+            sausage64_set_anim(&player.model, ANIMATION_nick_stand_idle_left);
+            break;
+    }
+}
 
+
+/* set viewport
+handles the system functions that enters the viewport position and rotation values */
+
+void set_viewport(Viewport *viewport)
+{
     guPerspective(
     	&viewport->projection, &viewport->normal, 
         45, (float)SCREEN_WD / (float)SCREEN_HT, 
     	10.0, 10000.0, 0.01);
     
     guLookAt(
-    	&viewport->pos_mtx,
+    	&viewport->position_mtx,
     	viewport->position[0], viewport->position[1], viewport->position[2],
     	viewport->target[0], viewport->target[1], viewport->target[2],
     	0, 0, 1
   	);
 
     gSPMatrix(glistp++, &viewport->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(glistp++, &viewport->pos_mtx, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(glistp++, &viewport->position_mtx, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     gSPPerspNormalize(glistp++, &viewport->normal);
 
     guMtxIdent(&viewport->modeling);
@@ -137,46 +141,66 @@ void set_viewport(Viewport *viewport, Entity player){
     
 }
 
-void set_light(){
 
-    // Setup the lights
+/* set light
+temporary function until i learn how the lights work  */
 
-    // Ambient color
-    light_amb.l.col[0] = 140;
-    light_amb.l.col[1] = 140;
-    light_amb.l.col[2] = 140;
+void set_light(LightData *light)
+{
+    int i;
 
-    light_amb.l.colc[0] = 140;
-    light_amb.l.colc[1] = 140;
-    light_amb.l.colc[2] = 140;
+    //color
+    for (i=0; i<3; i++)
+    {
+        // Ambient color
+        light->amb.l.col[i] = 140;
+        light->amb.l.colc[i] = 140;
 
-    //Light color
-    light_dir.l.col[0] = 255;
-    light_dir.l.col[1] = 255;
-    light_dir.l.col[2] = 255;
-
-    light_dir.l.colc[0] = 255;
-    light_dir.l.colc[1] = 255;
-    light_dir.l.colc[2] = 255;
+        //directional light color
+        light->dir.l.col[i] = 255;
+        light->dir.l.colc[i] = 255;
+    }
 
     // Direction
-    light_dir.l.dir[0] = 60;
-    light_dir.l.dir[1] = 60;
-    light_dir.l.dir[2] = 60;
+    light->dir.l.dir[0] = -127*sinf(light->angle[0]*0.0174532925);
+    light->dir.l.dir[1] = 127*sinf(light->angle[2]*0.0174532925)*cosf(light->angle[0]*0.0174532925);
+    light->dir.l.dir[2] = 127*cosf(light->angle[2]*0.0174532925)*cosf(light->angle[0]*0.0174532925);
 
     // Send the light struct to the RSP
     gSPNumLights(glistp++, NUMLIGHTS_1);
-    gSPLight(glistp++, &light_dir, 1);
-    gSPLight(glistp++, &light_amb, 2);
+    gSPLight(glistp++, &light->dir, 1);
+    gSPLight(glistp++, &light->amb, 2);
     gDPPipeSync(glistp++);
     
 }
 
 
-/*==============================
-    draw_frame      
-    Draw the stage
-==============================*/
+/* set entity
+handles the system functions that enters the entity position and rotation values */
+
+void set_entity (Entity *entity)
+{
+    guTranslate(&entity->position_mtx, entity->position[0], entity->position[1], entity->position[2]);
+    guRotate(&entity->rotation_mtx[0], entity->pitch, 1, 0, 0);
+    guRotate(&entity->rotation_mtx[1], entity->yaw, 0, 0, 1);
+    guScale(&entity->scale_mtx, entity->scale, entity->scale, entity->scale);
+
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[0]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[1]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+
+    sausage64_drawmodel(&glistp, &entity->model);
+
+    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+}
+
+
+/* draw_frame      
+handles the system tasks given the setted scene */
 
 void draw_frame(void)
 {
@@ -188,9 +212,9 @@ void draw_frame(void)
     rcp_init();
     fb_clear(180, 180, 180);
     
-    set_viewport(&viewport, player);
+    set_viewport(&viewport);
 
-    set_light();
+    set_light(&light);
     
     // Initialize the model matrix
     guMtxIdent(&viewport.modeling);
@@ -211,8 +235,7 @@ void draw_frame(void)
     gDPSetTextureDetail(glistp++, G_TD_CLAMP);
     gDPSetTextureLUT(glistp++, G_TT_NONE);
     
-    // Draw nick
-    sausage64_drawmodel(&glistp, &nick);
+    set_entity(&player);
     
     // Syncronize the RCP and CPU and specify that our display list has ended
     gDPFullSync(glistp++);
@@ -222,6 +245,7 @@ void draw_frame(void)
     osWritebackDCache(&viewport.projection, sizeof(viewport.projection));
     osWritebackDCache(&viewport.modeling, sizeof(viewport.modeling));
     
+    // is this the command that actually draws stuff?
     // Ensure we haven't gone over the display list size and start the graphics task
     debug_assert((glistp-glist) < GLIST_LENGTH);
     #if TV_TYPE != PAL
@@ -236,27 +260,3 @@ void draw_frame(void)
         nuDebConDisp(NU_SC_SWAPBUFFER);
     #endif
 }
-
-
-/*********************************
-     Model callback functions
-*********************************/
-
-
-/*==============================
-    nick_animcallback
-    Called before an animation finishes
-    @param The animation that is finishing
-==============================*/
-
-void nick_animcallback(u16 anim)
-{
-    // Go to idle animation when we finished attacking
-    switch(anim)
-    {
-        case ANIMATION_nick_run_to_roll_left:
-            sausage64_set_anim(&nick, ANIMATION_nick_stand_idle_left);
-            break;
-    }
-}
-
