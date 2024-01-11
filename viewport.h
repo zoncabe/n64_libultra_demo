@@ -39,8 +39,6 @@ typedef struct{
 
 // functions prototypes
 
-void move_viewport_stick(Viewport *viewport, NUContData cont[1]);
-
 void set_viewport_position(Viewport *viewport, Entity entity);
 
 
@@ -48,24 +46,6 @@ void set_viewport_position(Viewport *viewport, Entity entity);
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 
-
-/* move_viewport_stick
-changes the viewport variables depending on controller input*/
-
-void move_viewport_stick(Viewport *viewport, NUContData cont[1])
-{
-    if (fabs(cont->stick_x) < 7) cont->stick_x = 0;
-    if (fabs(cont->stick_y) < 7) cont->stick_y = 0;
-
-    viewport->angle_around_target += cont->stick_x / 20;
-    viewport->pitch += cont->stick_y / 20;
-
-    if (viewport->angle_around_target > 360) {viewport->angle_around_target  = viewport->angle_around_target - 360;}
-    if (viewport->angle_around_target < 0) {viewport->angle_around_target  = viewport->angle_around_target + 360;}
-
-    if (viewport->pitch > 85) viewport->pitch = 85;
-    if (viewport->pitch < -85) viewport->pitch = -85;
-}
 
 /*set_viewport_position
 calculates the viewport position given the input controlled variables*/

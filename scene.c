@@ -3,6 +3,8 @@ handles the demo scene */
 
 #include <nusys.h>
 #include <string.h> // Needed for CrashSDK compatibility
+#include <math.h>
+
 #include "config.h"
 #include "helper.h"
 #include "sausage64.h"
@@ -10,11 +12,13 @@ handles the demo scene */
 
 #include "nickTex.h"
 #include "nickMdl.h"
+#include "axisMdl.h"
 
 #include "math_util.h"
 #include "time.h"
 #include "entity.h"
 #include "viewport.h"
+#include "controls.h"
 
 
 // macros
@@ -34,6 +38,8 @@ void set_entity (Entity *entity);
 
 // globals
 
+int input;
+
 Viewport viewport = {
     distance_from_target: 300,
     angle_around_target: 0,
@@ -44,13 +50,11 @@ Entity player = {
     scale: 1,
 };
 
-// Lights
-
 LightData light = {
     angle: { 60, 60, 60},
 };
 
-// nick
+TimeData timedata;
 
 Mtx nickMtx[MESHCOUNT_nick];
 float animspeed;
@@ -81,22 +85,21 @@ handles the elements that modify the scene state */
 
 void scene_update()
 {
-    int i; 
-    
+    //updates the frame timings
+    time_management(&timedata);
+
     // Advance nick's animation
     sausage64_advance_anim(&player.model, animspeed);
     
-    
-    /* -------- Controller -------- */
-    
-    // Read the controllers
+    // Read the controller 1
     nuContDataGetEx(contdata, 0);
+    move_entity_stick(&player, viewport, contdata);
+    set_entity_position(&player, timedata);
+
+    // Read the controller 2   
     nuContDataGetEx(contdata, 1);
-
     move_viewport_stick(&viewport, contdata);
-
     set_viewport_position(&viewport, player);
-    
 }
 
 
@@ -199,12 +202,36 @@ void set_entity (Entity *entity)
 }
 
 
+/* set_debug_data      
+sets debug information to be shown on screen */
+
+void set_debug_data(){
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "time  %d", (int) get_time());
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed x  %.d", (int)player.target_speed[0]);
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "input amount  %d", (int)player.target_speed[1]);
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "yaw  %d", (int)player.target_yaw);
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "angle at  %d", (int)viewport.angle_around_target);
+
+}
+
 /* draw_frame      
 handles the system tasks given the setted scene */
 
 void draw_frame(void)
 {
-    
     // Assign our glist pointer to our glist array for ease of access
     glistp = glist;
 
@@ -236,6 +263,8 @@ void draw_frame(void)
     gDPSetTextureLUT(glistp++, G_TT_NONE);
     
     set_entity(&player);
+
+    gSPDisplayList(glistp++, gfx_axis);
     
     // Syncronize the RCP and CPU and specify that our display list has ended
     gDPFullSync(glistp++);
@@ -257,6 +286,7 @@ void draw_frame(void)
     // Draw the menu (doesn't work on PAL)
     #if TV_TYPE != PAL
         nuDebConClear(NU_DEB_CON_WINDOW0);
+        set_debug_data();
         nuDebConDisp(NU_SC_SWAPBUFFER);
     #endif
 }

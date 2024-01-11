@@ -1,7 +1,6 @@
 #ifndef MATH_UTIL_H
 #define MATH_UTIL_H
 
-#include <math.h>
 
 float get_time();
 float rad(float angle);

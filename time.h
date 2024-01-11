@@ -9,7 +9,7 @@ here are all the structures and functions prototypes that involve the calculatio
 
 typedef struct{
 
-	OSTime cur_frame;
+	OSTime currrent_frame;
 	OSTime last_frame;
 	float frame_duration;
 	f32 FPS;
@@ -54,13 +54,13 @@ calculates FPS and frame_duration variable */
 
 void time_management(TimeData *time)
 {
-    time->cur_frame = osGetTime();
+    time->currrent_frame = osGetTime();
 
-    time->frame_duration = cycles_to_sec(time->cur_frame - time->last_frame);
+    time->frame_duration = cycles_to_sec(time->currrent_frame - time->last_frame);
 
     time->FPS = 1 / time->frame_duration;
 
-    time->last_frame = time->cur_frame;
+    time->last_frame = time->currrent_frame;
 }
 
 
