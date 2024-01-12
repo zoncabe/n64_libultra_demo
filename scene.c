@@ -41,9 +41,9 @@ void set_entity (Entity *entity);
 int input;
 
 Viewport viewport = {
-    distance_from_target: 300,
+    distance_from_target: 370,
     angle_around_target: 0,
-    pitch: 10, 
+    pitch: 30, 
 };
 
 Entity player = {
@@ -214,13 +214,13 @@ void set_debug_data(){
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed x  %.d", (int)player.target_speed[0]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed x  %d", (int)player.target_speed[0]);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "input amount  %d", (int)player.target_speed[1]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed y  %d", (int)player.target_speed[1]);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "yaw  %d", (int)player.target_yaw);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "input amount  %d", (int)player.input_amount);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "angle at  %d", (int)viewport.angle_around_target);
