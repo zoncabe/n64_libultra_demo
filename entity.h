@@ -7,13 +7,23 @@ here are all the structures and functions prototypes that involve the setting up
 
 // structures
 
+typedef enum {
+    IDLE,
+    WALKING,
+    RUNNING
+
+} EntityState;
+
 typedef struct {
 
 	Mtx	position_mtx;
 	Mtx	rotation_mtx[3];
 	Mtx scale_mtx;
+	
+	EntityState previous_state;
+	EntityState state;
 
-    float scale;
+	float scale;
 	float position[3];
 	float pitch;
 
@@ -29,12 +39,16 @@ typedef struct {
     float framerate;
 
 	float input_amount;
+	
+	float directional_speed;
 
 } Entity;
 
 
+
 // functions prototypes
 
+void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
 void set_entity_position(Entity *entity, TimeData time_data);
 
 
@@ -43,7 +57,18 @@ void set_entity_position(Entity *entity, TimeData time_data);
 
 
 
-/*set_entity_position
+/* init_entity
+this is a not working pototype function that i left behind because its driving me crazy*/
+
+void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16))
+{
+    sausage64_initmodel(&entity->model, entity->model.mdldata, entityMtx);
+    sausage64_set_anim(&entity->model, idle); 
+    sausage64_set_animcallback(&entity->model, animcallback);
+}
+
+
+/* set_entity_position
 calculates the entity position given the speed and the available frame duration*/
 
 void set_entity_position(Entity *entity, TimeData time_data)

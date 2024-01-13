@@ -40,7 +40,8 @@ changes the entity position variables depending on controller input */
 
 void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
 {
-    float input_amount;
+    float input_amount; 
+    float directional_speed = 0;
 
 	if (fabs(contdata->stick_x) < 9) {contdata->stick_x = 0;}
 	if (fabs(contdata->stick_y) < 9) {contdata->stick_y = 0;}
@@ -50,12 +51,18 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
         
         input_amount = 1 / qi_sqrt(contdata->stick_x * contdata->stick_x +  contdata->stick_y * contdata->stick_y);
         entity->target_yaw = deg(atan2(contdata->stick_x, -contdata->stick_y) - rad(viewport.angle_around_target));
-    }    
-    
-    entity->input_amount = input_amount; //debug data collecting
+    }
+
+    if (fabs(entity->speed[0]) > 0 || fabs(entity->speed[1]) > 0) directional_speed = 1 / qi_sqrt(entity->speed[0] * entity->speed[0] +  entity->speed[1] * entity->speed[1]);
+
+    //debug data collecting
+    entity->input_amount = input_amount;
+    entity->directional_speed = directional_speed;
     
     if (input_amount == 0){
         
+        if (entity->state != IDLE && fabs(directional_speed) < 5) set_entity_state(entity, IDLE);
+
         if  (fabs(entity->speed[0]) < 1 && fabs(entity->speed[1]) < 1){
             entity->speed[0] = 0;
             entity->speed[1] = 0;
@@ -67,24 +74,16 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
 
     else if (input_amount > 0 && input_amount <= 60){
 
-        entity->target_speed[0] = 80 * sinf(rad(entity->target_yaw));
-        entity->target_speed[1] = 80 * -cosf(rad(entity->target_yaw));
-
-        entity->acceleration[0] = 4 * (entity->target_speed[0] - entity->speed[0]);
-        entity->acceleration[1] = 4 * (entity->target_speed[1] - entity->speed[1]);
+        set_entity_state(entity, WALKING);
     }
+
     else if (input_amount > 60){
 
-        entity->target_speed[0] = 200 * sinf(rad(entity->target_yaw));
-        entity->target_speed[1] = 200 * -cosf(rad(entity->target_yaw));
-
-        entity->acceleration[0] = 4 * (entity->target_speed[0] - entity->speed[0]);
-        entity->acceleration[1] = 4 * (entity->target_speed[1] - entity->speed[1]);
+        set_entity_state(entity, RUNNING);
     }
     
     if (entity->speed[0] != 0 || entity->speed[1] != 0) entity->yaw = deg(atan2(entity->speed[0], -entity->speed[1]));
 }
-    
 
 
 #endif

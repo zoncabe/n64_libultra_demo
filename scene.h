@@ -4,8 +4,8 @@
 
 // Scene functions
     
-    void scene_init();
-    void scene_update();
+    void init_scene();
+    void update_scene();
     void draw_frame();
     
     

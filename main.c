@@ -48,7 +48,7 @@ void mainproc(void)
     nuContInit();
         
     // Initialize stage 0
-    scene_init();
+    init_scene();
         
     // Set callback functions for reset and graphics
     nuGfxFuncSet((NUGfxFunc)callback_vsync);
@@ -70,7 +70,7 @@ void mainproc(void)
 static void callback_vsync(int tasksleft)
 {
     // Update the stage, then draw it when the RDP is ready
-    scene_update();
+    update_scene();
     if (tasksleft < 1)
         draw_frame();
 }

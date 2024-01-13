@@ -18,6 +18,7 @@ handles the demo scene */
 #include "time.h"
 #include "entity.h"
 #include "viewport.h"
+#include "entitystates.h"
 #include "controls.h"
 
 
@@ -63,11 +64,14 @@ float animspeed;
 /* scene_init
 initializes the elements of the scene that require function calling */
 
-void scene_init(void)
+void init_scene(void)
 {
     // Initialize nick
+
+    //init_entity(&player, 15, nickMtx, nick_animcallback);
+
     sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
-    sausage64_set_anim(&player.model, ANIMATION_nick_walk_left); 
+    sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left); 
     sausage64_set_animcallback(&player.model, nick_animcallback);
     
     // Set nick's animation speed based on region
@@ -83,7 +87,7 @@ void scene_init(void)
 /* scene_update
 handles the elements that modify the scene state */
 
-void scene_update()
+void update_scene()
 {
     //updates the frame timings
     time_management(&timedata);
@@ -223,7 +227,7 @@ void set_debug_data(){
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "input amount  %d", (int)player.input_amount);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "angle at  %d", (int)viewport.angle_around_target);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);
 
 }
 
