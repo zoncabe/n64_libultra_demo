@@ -6,13 +6,13 @@ float get_time();
 float rad(float angle);
 float deg(float rad);
 float qi_sqrt(float number);
+float calculate_hypotenuse(float x, float y);
 int lim(u32 input);
 
 
   
-/*==============================================================
-    rad - angle to radians
-==============================================================*/
+/* rad
+angle to radians*/
 
 float rad(float angle){
 	osSyncPrintf("1 rad\n");
@@ -21,9 +21,8 @@ float rad(float angle){
 	return radian;
 }
 
-/*==============================================================
-    deg - radians to angle
-==============================================================*/
+/* deg
+radians to angle*/
 
 float deg(float rad){
 	float angle = 180 / M_PI * rad;
@@ -31,10 +30,8 @@ float deg(float rad){
 }
 
 
-/*==============================================================
-    qi_sqrt
-    quick inverse square root
-==============================================================*/
+/*qi_sqrt
+quick inverse square root*/
 
 float qi_sqrt(float number){
 
@@ -53,10 +50,19 @@ float qi_sqrt(float number){
 	return y;
 }
 
-/*==============================================================
-    lim
-    auxiliary function for 8 directional movement
-==============================================================*/
+
+
+/* calculate hypotenuse
+ calculates hypotenuse of a rect triangle given its sides */
+
+float calculate_hypotenuse(float x, float y){
+    float hypotenuse = 1 / qi_sqrt(x * x +  y * y);
+    return hypotenuse;
+}
+
+
+/* lim
+ auxiliary function for 8 directional movement*/
 
 int lim(u32 input){
     if (input == 0) {return 0;}

@@ -49,27 +49,27 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
 
     if (fabs(contdata->stick_x) > 0 || fabs(contdata->stick_y) > 0) {
         
-        input_amount = 1 / qi_sqrt(contdata->stick_x * contdata->stick_x +  contdata->stick_y * contdata->stick_y);
+        input_amount = calculate_hypotenuse(contdata->stick_x ,contdata->stick_y);
         entity->target_yaw = deg(atan2(contdata->stick_x, -contdata->stick_y) - rad(viewport.angle_around_target));
     }
 
-    if (fabs(entity->speed[0]) > 0 || fabs(entity->speed[1]) > 0) directional_speed = 1 / qi_sqrt(entity->speed[0] * entity->speed[0] +  entity->speed[1] * entity->speed[1]);
+    if (fabs(entity->speed[0]) > 0 || fabs(entity->speed[1]) > 0) directional_speed = calculate_hypotenuse(entity->speed[0], entity->speed[1]);
 
     //debug data collecting
     entity->input_amount = input_amount;
     entity->directional_speed = directional_speed;
     
     if (input_amount == 0){
-        
-        if (entity->state != IDLE && fabs(directional_speed) < 5) set_entity_state(entity, IDLE);
 
         if  (fabs(entity->speed[0]) < 1 && fabs(entity->speed[1]) < 1){
             entity->speed[0] = 0;
             entity->speed[1] = 0;
         }
-
+        
         entity->acceleration[0] = 9 * (0 - entity->speed[0]);
         entity->acceleration[1] = 9 * (0 - entity->speed[1]);
+
+        if (entity->state =! IDLE && fabs(directional_speed) < 5) set_entity_state(entity, IDLE);
     }
 
     else if (input_amount > 0 && input_amount <= 60){
