@@ -8,9 +8,12 @@ here are all the structures and functions prototypes that involve the setting up
 // structures
 
 typedef enum {
+	EMPTY,
     IDLE,
     WALKING,
-    RUNNING
+    RUNNING,
+	ROLL,
+	JUMP,
 
 } EntityState;
 
@@ -39,7 +42,7 @@ typedef struct {
     float framerate;
 
 	float input_amount;
-	
+
 	float directional_speed;
 
 } Entity;

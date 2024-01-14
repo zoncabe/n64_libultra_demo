@@ -526,6 +526,12 @@ void sausage64_set_anim(s64ModelHelper* mdl, u16 anim)
 }
 
 
+u32 sausage64_get_curranim(s64ModelHelper* mdl)
+{
+    return mdl->curanim - &mdl->mdldata->anims[0];
+}
+
+
 #ifdef LIBDRAGON
     /*==============================
         sausage64_loadmaterial

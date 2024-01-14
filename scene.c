@@ -42,13 +42,14 @@ void set_entity (Entity *entity);
 int input;
 
 Viewport viewport = {
-    distance_from_target: 370,
+    distance_from_target: 400,
     angle_around_target: 0,
     pitch: 30, 
 };
 
 Entity player = {
     scale: 1,
+    state: IDLE,
 };
 
 LightData light = {
@@ -69,10 +70,13 @@ void init_scene(void)
     // Initialize nick
 
     //init_entity(&player, 15, nickMtx, nick_animcallback);
-
     sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
-    sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left); 
+
+    //sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left);
+    set_entity_state(&player, IDLE);
+
     sausage64_set_animcallback(&player.model, nick_animcallback);
+    
     
     // Set nick's animation speed based on region
     #if TV_TYPE == PAL
@@ -100,6 +104,8 @@ void update_scene()
     move_entity_stick(&player, viewport, contdata);
     set_entity_position(&player, timedata);
 
+    set_entity_actions(&player, contdata);
+
     // Read the controller 2   
     nuContDataGetEx(contdata, 1);
     move_viewport_stick(&viewport, contdata);
@@ -115,8 +121,12 @@ void nick_animcallback(u16 anim)
 {
     switch(anim)
     {
+        case ANIMATION_nick_stand_to_roll_left:
+            set_entity_state(&player, IDLE);
+            break;
+
         case ANIMATION_nick_run_to_roll_left:
-            sausage64_set_anim(&player.model, ANIMATION_nick_stand_idle_left);
+            set_entity_state(&player, IDLE);
             break;
     }
 }
@@ -218,16 +228,21 @@ void set_debug_data(){
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed x  %d", (int)player.target_speed[0]);
+    if(player.state == IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "IDLE");
+    if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
+    if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
+    if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t speed y  %d", (int)player.target_speed[1]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "yaw  %d", (int)player.yaw);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "input amount  %d", (int)player.input_amount);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t yaw  %d", (int)player.target_yaw);
+/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);
+*/
 
 }
 

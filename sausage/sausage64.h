@@ -186,6 +186,14 @@
     ==============================*/
     
     extern void sausage64_set_anim(s64ModelHelper* mdl, u16 anim);
+
+    /*==============================
+        sausage64_get_curranim
+        Returns the index of the current animation.
+        @param The model helper pointer
+    ==============================*/
+    
+    u32 sausage64_get_curranim(s64ModelHelper* mdl);
     
     
     /*==============================
