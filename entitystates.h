@@ -21,7 +21,7 @@ void set_roll_state(Entity *entity);
 
 
 
-void set_entity_state(Entity * entity, EntityState new_state) 
+void set_entity_state(Entity *entity, EntityState new_state) 
 {
     
     switch(new_state) {
@@ -49,9 +49,9 @@ void set_idle_state(Entity *entity)
 {
     if (entity->previous_state == IDLE) return;
     
-    entity->previous_state = IDLE;
     entity->state = IDLE;
     sausage64_set_anim(&entity->model, ANIMATION_nick_look_around_left);
+    entity->previous_state = IDLE;
 }
 
 
@@ -126,11 +126,11 @@ void set_roll_state(Entity *entity)
 
         case RUNNING: {
 
-            entity->target_speed[0] = 300 * sinf(rad(entity->yaw));
-            entity->target_speed[1] = 300 * -cosf(rad(entity->yaw));
+            entity->target_speed[0] = 280 * sinf(rad(entity->yaw));
+            entity->target_speed[1] = 280 * -cosf(rad(entity->yaw));
 
-            entity->acceleration[0] = 8 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 8 * (entity->target_speed[1] - entity->speed[1]);
+            entity->acceleration[0] = 16 * (entity->target_speed[0] - entity->speed[0]);
+            entity->acceleration[1] = 16 * (entity->target_speed[1] - entity->speed[1]);
 
             if (entity->state == ROLL) return;
             

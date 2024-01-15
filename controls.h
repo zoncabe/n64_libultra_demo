@@ -55,11 +55,7 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
     float input_amount = 0; 
     float directional_speed = 0;
 
-	if (fabs(contdata->stick_x) < 9) {contdata->stick_x = 0;}
-	if (fabs(contdata->stick_y) < 9) {contdata->stick_y = 0;}
-
-
-    if (fabs(contdata->stick_x) > 0 || fabs(contdata->stick_y) > 0) {
+    if (fabs(contdata->stick_x) > 8 || fabs(contdata->stick_y) > 8) {
         input_amount = calculate_hypotenuse(contdata->stick_x ,contdata->stick_y);
         entity->target_yaw = deg(atan2(contdata->stick_x, -contdata->stick_y) - rad(viewport.angle_around_target));
     }
@@ -79,7 +75,7 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
         entity->acceleration[0] = 9 * (0 - entity->speed[0]);
         entity->acceleration[1] = 9 * (0 - entity->speed[1]);
 
-        if (entity->state != IDLE && (entity->state != ROLL) && fabs(directional_speed) < 20) set_entity_state(entity, IDLE);
+        if (fabs(directional_speed) < 20) set_entity_state(entity, IDLE);
     }
 
     else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL)

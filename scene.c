@@ -122,7 +122,7 @@ void nick_animcallback(u16 anim)
     switch(anim)
     {
         case ANIMATION_nick_stand_to_roll_left:
-            set_entity_state(&player, IDLE);
+            set_entity_state(&player, ANIMATION_nick_look_around_left);
             break;
 
         case ANIMATION_nick_run_to_roll_left:
@@ -234,11 +234,11 @@ void set_debug_data(){
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "yaw  %d", (int)player.yaw);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "stick input  %d", (int)player.input_amount);
+/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "t yaw  %d", (int)player.target_yaw);
-/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);
