@@ -52,10 +52,11 @@ changes the entity position variables depending on controller input */
 
 void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
 {
+    int deadzone = 8;
     float input_amount = 0; 
     float directional_speed = 0;
 
-    if (fabs(contdata->stick_x) > 8 || fabs(contdata->stick_y) > 8) {
+    if (fabs(contdata->stick_x) > deadzone || fabs(contdata->stick_y) > deadzone) {
         input_amount = calculate_hypotenuse(contdata->stick_x ,contdata->stick_y);
         entity->target_yaw = deg(atan2(contdata->stick_x, -contdata->stick_y) - rad(viewport.angle_around_target));
     }
@@ -67,19 +68,10 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
     entity->directional_speed = directional_speed;
     
     if (input_amount == 0 && entity->state != ROLL){
-        if  (fabs(entity->speed[0]) < 1 && fabs(entity->speed[1]) < 1){
-            entity->speed[0] = 0;
-            entity->speed[1] = 0;
-        }
-        
-        entity->acceleration[0] = 9 * (0 - entity->speed[0]);
-        entity->acceleration[1] = 9 * (0 - entity->speed[1]);
-
-        if (fabs(directional_speed) < 20) set_entity_state(entity, IDLE);
+        set_entity_state(entity, IDLE);
     }
 
-    else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL)
-    {
+    else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL){
         set_entity_state(entity, WALKING);
     }
 

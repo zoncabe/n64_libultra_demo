@@ -49,7 +49,6 @@ Viewport viewport = {
 
 Entity player = {
     scale: 1,
-    state: IDLE,
 };
 
 LightData light = {
@@ -106,6 +105,8 @@ void update_scene()
 
     set_entity_actions(&player, contdata);
 
+    set_entity_state(&player, player.state);
+
     // Read the controller 2   
     nuContDataGetEx(contdata, 1);
     move_viewport_stick(&viewport, contdata);
@@ -122,10 +123,14 @@ void nick_animcallback(u16 anim)
     switch(anim)
     {
         case ANIMATION_nick_stand_to_roll_left:
-            set_entity_state(&player, ANIMATION_nick_look_around_left);
+            //sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left);
+            
+            set_entity_state(&player, IDLE);
             break;
 
         case ANIMATION_nick_run_to_roll_left:
+            //sausage64_set_anim(&player.model, ANIMATION_nick_jump_right);
+            
             set_entity_state(&player, IDLE);
             break;
     }
@@ -234,7 +239,7 @@ void set_debug_data(){
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "stick input  %d", (int)player.input_amount);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "stick input  %d", (int)player.directional_speed);
 /*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
