@@ -42,13 +42,25 @@ void set_entity (Entity *entity);
 int input;
 
 Viewport viewport = {
-    distance_from_target: 400,
+    distance_from_target: 450,
     angle_around_target: 0,
     pitch: 30, 
 };
 
 Entity player = {
     scale: 1,
+    walk_target_speed: 120,
+	run_target_speed: 260,
+	idle_to_roll_target_speed: 140,
+	walk_to_roll_target_speed: 160,
+	run_to_roll_target_speed: 280,
+
+    idle_to_roll_change_grip_tick: 20,
+    walk_to_roll_change_grip_tick: 23,
+	run_to_roll_change_grip_tick: 20,
+
+	walk_grounded_foot_change_tick: 15,
+	run_grounded_foot_change_tick: 10,
 };
 
 LightData light = {
@@ -239,7 +251,7 @@ void set_debug_data(){
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "stick input  %d", (int)player.directional_speed);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "tick  %d", (int)player.model.animtick);
 /*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);

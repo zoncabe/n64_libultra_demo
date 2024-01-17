@@ -17,6 +17,12 @@ typedef enum {
 
 } EntityState;
 
+typedef enum {
+	LEFT,
+    RIGHT,
+
+} Foot;
+
 typedef struct {
 
 	Mtx	position_mtx;
@@ -25,6 +31,20 @@ typedef struct {
 	
 	EntityState previous_state;
 	EntityState state;
+
+	float walk_target_speed;
+	float run_target_speed;
+	float idle_to_roll_target_speed;
+	float walk_to_roll_target_speed;
+	float run_to_roll_target_speed;
+	
+	int idle_to_roll_change_grip_tick;
+	int walk_to_roll_change_grip_tick;
+	int run_to_roll_change_grip_tick;
+	int walk_grounded_foot_change_tick;
+	int run_grounded_foot_change_tick;
+
+	Foot grounded_foot;
 
 	float scale;
 	float position[3];
