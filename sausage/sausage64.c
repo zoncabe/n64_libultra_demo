@@ -524,19 +524,40 @@ void sausage64_set_anim(s64ModelHelper* mdl, u16 anim)
     if (animdata->keyframecount > 0)
         sausage64_update_anim(mdl);
 }
-/*
-void sausage64_set_anim_keyframe(s64ModelHelper* mdl, u16 anim, float animtick, u32 curkeyframe)
-{
+
+
+/*==============================
+    sausage64_set_anim_tick
+    Sets an animation on the model given a tick. 
+    Does not perform error checking if an invalid animation is given.
+    @param The model helper pointer
+    @param The ANIMATION_* macro to set
+==============================*/
+
+void sausage64_set_anim_tick(s64ModelHelper* mdl, u16 anim, float animtick)
+{   
+    u32 curkeyframe = 0;
+
     s64Animation* animdata = &mdl->mdldata->anims[anim];
     mdl->curanim = animdata;
     mdl->curanimlen = animdata->keyframes[animdata->keyframecount-1].framenumber;
+
+    while (animtick >= animdata->keyframes[curkeyframe].framenumber){
+        curkeyframe ++;
+    }
+    
     mdl->curkeyframe = curkeyframe;
     mdl->animtick = animtick;
     if (animdata->keyframecount > 0)
         sausage64_update_anim(mdl);
 }
 
-*/
+
+/*==============================
+    sausage64_get_curranim
+    Returns the index of the current animation.
+    @param The model helper pointer
+==============================*/
 
 u32 sausage64_get_curranim(s64ModelHelper* mdl)
 {

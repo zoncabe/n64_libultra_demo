@@ -188,6 +188,16 @@
     extern void sausage64_set_anim(s64ModelHelper* mdl, u16 anim);
 
     /*==============================
+        sausage64_set_anim_tick
+        Sets an animation on the model given a tick. 
+        Does not perform error checking if an invalid animation is given.
+        @param The model helper pointer
+        @param The ANIMATION_* macro to set
+    ==============================*/
+
+    extern void sausage64_set_anim_tick(s64ModelHelper* mdl, u16 anim, float animtick);
+
+    /*==============================
         sausage64_get_curranim
         Returns the index of the current animation.
         @param The model helper pointer

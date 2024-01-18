@@ -252,10 +252,10 @@ void set_debug_data(){
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "tick  %d", (int)player.model.animtick);
-/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "t yaw  %d", (int)player.target_yaw);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "keyframe  %d", (int)player.model.curkeyframe);
+/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);

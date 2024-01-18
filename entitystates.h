@@ -138,7 +138,7 @@ void set_roll_state(Entity *entity)
 
             entity->state = ROLL;
             
-            sausage64_set_anim(&entity->model, ANIMATION_nick_stand_to_roll_left);           
+            sausage64_set_anim_tick(&entity->model, ANIMATION_nick_stand_to_roll_left, 30);           
 
             break;
         }
