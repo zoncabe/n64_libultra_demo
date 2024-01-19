@@ -131,6 +131,10 @@
         u8 interpolate;
         u8 loop;
         s64Animation* curanim;
+        s64Animation* nextanim;
+        u32 nextanim_target_keyframe;
+        u32 transition_tick_amount;
+
         u32 curanimlen;
         float animtick;
         u32 curkeyframe;

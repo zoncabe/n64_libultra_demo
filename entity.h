@@ -32,6 +32,9 @@ typedef struct {
 	EntityState previous_state;
 	EntityState state;
 
+	int A_press;
+	int B_press;
+
 	float walk_target_speed;
 	float run_target_speed;
 	float idle_to_roll_target_speed;

@@ -41,10 +41,26 @@ void set_entity_actions(Entity *entity, NUContData contdata[1])
     //if (contdata[0].trigger & D_CBUTTONS);
     //if (contdata[0].trigger & R_TRIG); 
     
-    if (contdata[0].trigger & B_BUTTON) set_entity_state(entity, ROLL);
+    if (contdata[0].trigger & B_BUTTON) {
+        
+        set_entity_state(entity, ROLL);
+        entity->A_press = 1;
+    } else {
+
+        entity->A_press = 0;
+    }
+
     
-    if (contdata[0].trigger & A_BUTTON) set_entity_state(entity, JUMP);
+    if (contdata[0].trigger & A_BUTTON) {
+
+        set_entity_state(entity, JUMP);
+        entity->B_press = 1;
+    } else {
+
+        entity->B_press = 0;
+    }
 }
+
 
 
 /*move_entity_stick

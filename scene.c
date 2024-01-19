@@ -29,7 +29,7 @@ handles the demo scene */
 
 // function prototypes
 
-void nick_animcallback(u16 anim);
+void entity_animcallback(u16 anim);
 
 void set_viewport(Viewport *viewport);
 
@@ -80,13 +80,13 @@ void init_scene(void)
 {
     // Initialize nick
 
-    //init_entity(&player, 15, nickMtx, nick_animcallback);
+    //init_entity(&player, 15, nickMtx, entity_animcallback);
     sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
 
     //sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left);
     set_entity_state(&player, IDLE);
 
-    sausage64_set_animcallback(&player.model, nick_animcallback);
+    sausage64_set_animcallback(&player.model, entity_animcallback);
     
     
     // Set nick's animation speed based on region
@@ -126,23 +126,21 @@ void update_scene()
 }
 
 
-/* nick_animcallback
+/* entity_animcallback
 Called before an animation finishes
 @param The animation that is finishing */
 
-void nick_animcallback(u16 anim)
+void entity_animcallback(u16 anim)
 {
     switch(anim)
     {
         case ANIMATION_nick_stand_to_roll_left:
-            //sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left);
             
             set_entity_state(&player, IDLE);
             break;
 
         case ANIMATION_nick_run_to_roll_left:
-            //sausage64_set_anim(&player.model, ANIMATION_nick_jump_right);
-            
+        
             set_entity_state(&player, IDLE);
             break;
     }
@@ -255,6 +253,23 @@ void set_debug_data(){
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "keyframe  %d", (int)player.model.curkeyframe);
+
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
+
+    if (player.A_press == 1) {
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "A");
+    }else {
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "no A");
+    }
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 7);
+
+    if (player.B_press == 1) {
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "B");
+    }else {
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "no B");
+    }
 /*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
