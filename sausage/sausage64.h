@@ -130,11 +130,13 @@
     typedef struct {
         u8 interpolate;
         u8 loop;
-        s64Animation* curanim;
-        s64Animation* nextanim;
-        u32 nextanim_target_keyframe;
-        u32 transition_tick_amount;
+        
+        s64Animation* prevanim;
+        u32 transition_previous_keyframe;
+        u32 transition_target_keyframe;
+        u32 transition_tick_count;
 
+        s64Animation* curanim;
         u32 curanimlen;
         float animtick;
         u32 curkeyframe;

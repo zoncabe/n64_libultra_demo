@@ -6,7 +6,7 @@
     
     void init_scene();
     void update_scene();
-    void draw_frame();
+    void render_frame();
     
     
 #endif

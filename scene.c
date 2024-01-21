@@ -19,6 +19,7 @@ handles the demo scene */
 #include "entity.h"
 #include "viewport.h"
 #include "entitystates.h"
+#include "viewportstates.h"
 #include "controls.h"
 
 
@@ -37,18 +38,31 @@ void set_light();
 
 void set_entity (Entity *entity);
 
+
 // globals
 
-int input;
-
 Viewport viewport = {
-    distance_from_target: 450,
-    angle_around_target: 0,
-    pitch: 30, 
+
+    distance_from_entity: 250,
+    target_distance: 250,
+    angle_around_entity: 0,
+    offset_angle: 20,
+    pitch: 10,
+    height: 90,
+
+    acceleration_settings: 8,
+    speed_settings: {80, 80},
 };
 
+
 Entity player = {
+
     scale: 1,
+
+    yaw: 180,
+
+    framerate: 0.5,
+
     walk_target_speed: 120,
 	run_target_speed: 260,
 	idle_to_roll_target_speed: 140,
@@ -63,14 +77,17 @@ Entity player = {
 	run_grounded_foot_change_tick: 10,
 };
 
+
 LightData light = {
-    angle: { 60, 60, 60},
+
+    angle: {60, 60, 60},
 };
+
 
 TimeData timedata;
 
+
 Mtx nickMtx[MESHCOUNT_nick];
-float animspeed;
 
 
 /* scene_init
@@ -84,16 +101,20 @@ void init_scene(void)
     sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
 
     //sausage64_set_anim(&player.model, ANIMATION_nick_look_around_left);
+    player.model.transition_tick_count = 300;
+    player.model.transition_tick_count = 300;
+
     set_entity_state(&player, IDLE);
+
 
     sausage64_set_animcallback(&player.model, entity_animcallback);
     
     
     // Set nick's animation speed based on region
     #if TV_TYPE == PAL
-        animspeed = 0.66;
+        
     #else
-        animspeed = 0.5;
+
     #endif
     
 }
@@ -104,25 +125,33 @@ handles the elements that modify the scene state */
 
 void update_scene()
 {
+
+    // Poll for USB commands
+    debug_pollcommands(); 
+
     //updates the frame timings
     time_management(&timedata);
 
-    // Advance nick's animation
-    sausage64_advance_anim(&player.model, animspeed);
+    // Advance entity animation
+    sausage64_advance_anim(&player.model, player.framerate);
     
-    // Read the controller 1
-    nuContDataGetEx(contdata, 0);
-    move_entity_stick(&player, viewport, contdata);
+    // Read the controllers
+    nuContDataGetEx(&contdata[0], 0);
+    nuContDataGetEx(&contdata[1], 1);
+
+    move_entity_stick(&player, viewport, &contdata[0]);
+
+    set_entity_actions(&player, &contdata[0]);
+
     set_entity_position(&player, timedata);
 
-    set_entity_actions(&player, contdata);
+    set_entity_state(&player, player.state);  
 
-    set_entity_state(&player, player.state);
+    move_viewport_c_buttons(&viewport, &contdata[0], timedata);
 
-    // Read the controller 2   
-    nuContDataGetEx(contdata, 1);
-    move_viewport_stick(&viewport, contdata);
-    set_viewport_position(&viewport, player);
+    //move_viewport_stick(&viewport, &contdata[1]);
+
+    set_viewport_position(&viewport, player, timedata);
 }
 
 
@@ -253,6 +282,7 @@ void set_debug_data(){
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "keyframe  %d", (int)player.model.curkeyframe);
+/*
 
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
@@ -270,7 +300,6 @@ void set_debug_data(){
     }else {
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "no B");
     }
-/*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);
@@ -281,7 +310,7 @@ void set_debug_data(){
 /* draw_frame      
 handles the system tasks given the setted scene */
 
-void draw_frame(void)
+void render_frame(void)
 {
     // Assign our glist pointer to our glist array for ease of access
     glistp = glist;

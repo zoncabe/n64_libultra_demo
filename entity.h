@@ -28,7 +28,7 @@ typedef struct {
 	Mtx	position_mtx;
 	Mtx	rotation_mtx[3];
 	Mtx scale_mtx;
-	
+
 	EntityState previous_state;
 	EntityState state;
 
@@ -65,8 +65,12 @@ typedef struct {
     float framerate;
 
 	float input_amount;
+	float input_x;
+	float input_y;
 
 	float directional_speed;
+
+	Mtx model_mtx[];
 
 } Entity;
 
@@ -74,9 +78,8 @@ typedef struct {
 
 // functions prototypes
 
-void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
-void set_entity_position(Entity *entity, TimeData time_data);
-
+//void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
+void set_entity_position(Entity *entity, TimeData timedata);
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -84,7 +87,7 @@ void set_entity_position(Entity *entity, TimeData time_data);
 
 
 /* init_entity
-this is a not working pototype function that i left behind because its driving me crazy*/
+this is a not working pototype function that i left behind because its driving me crazy
 
 void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16))
 {
@@ -92,20 +95,30 @@ void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(
     sausage64_set_anim(&entity->model, idle); 
     sausage64_set_animcallback(&entity->model, animcallback);
 }
+*/
 
 
 /* set_entity_position
 calculates the entity position given the speed and the available frame duration*/
 
-void set_entity_position(Entity *entity, TimeData time_data)
+void set_entity_position(Entity *entity, TimeData timedata)
 {
-    entity->speed[0] += (entity->acceleration[0] * time_data.frame_duration);
-    entity->speed[1] += (entity->acceleration[1] * time_data.frame_duration);
-    entity->speed[2] += (entity->acceleration[2] * time_data.frame_duration);
+    entity->speed[0] += (entity->acceleration[0] * timedata.frame_duration);
+    entity->speed[1] += (entity->acceleration[1] * timedata.frame_duration);
+    entity->speed[2] += (entity->acceleration[2] * timedata.frame_duration);
 
-    entity->position[0] += entity->speed[0] * time_data.frame_duration;
-    entity->position[1] += entity->speed[1] * time_data.frame_duration;
-    entity->position[2] += entity->speed[2] * time_data.frame_duration;
+    if (entity->speed[0] != 0 || entity->speed[1] != 0) {
+
+		// set yaw based on speed
+		entity->yaw = deg(atan2(entity->speed[0], -entity->speed[1]));
+		// debug data collecting
+		//entity->directional_speed = calculate_diagonal(entity->speed[0], entity->speed[1]);
+	}
+
+    entity->position[0] += entity->speed[0] * timedata.frame_duration;
+    entity->position[1] += entity->speed[1] * timedata.frame_duration;
+    entity->position[2] += entity->speed[2] * timedata.frame_duration;
+
 }
 
 

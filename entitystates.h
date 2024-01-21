@@ -2,7 +2,7 @@
 #define ENTITYSTATES_H
 
 /* ENTITYSTATES.H
-here are all the state machine related functions */
+here are all the entity state machine related functions */
 
 // entity properties
 

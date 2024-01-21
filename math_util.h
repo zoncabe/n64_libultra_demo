@@ -6,7 +6,7 @@ float get_time();
 float rad(float angle);
 float deg(float rad);
 float qi_sqrt(float number);
-float calculate_hypotenuse(float x, float y);
+float calculate_diagonal(float x, float y);
 int lim(u32 input);
 
 
@@ -52,12 +52,12 @@ float qi_sqrt(float number){
 
 
 
-/* calculate hypotenuse
- calculates hypotenuse of a rect triangle given its sides */
+/* calculate diagonal
+ calculates diagonal of a rect triangle given its sides */
 
-float calculate_hypotenuse(float x, float y){
-    float hypotenuse = 1 / qi_sqrt(x * x +  y * y);
-    return hypotenuse;
+float calculate_diagonal(float x, float y){
+    float diagonal = 1 / qi_sqrt(x * x +  y * y);
+    return diagonal;
 }
 
 
