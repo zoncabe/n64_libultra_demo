@@ -7,6 +7,7 @@ here are all the input related functions */
 
 // function prototypes
 
+int input(u32 input);
 void move_viewport_stick(Viewport *viewport, NUContData *contdata);
 void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData timedata);
 void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata);
@@ -16,6 +17,15 @@ void set_entity_actions(Entity *entity, NUContData *contdata);
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
+
+
+/* input
+ auxiliary function for 8 directional movement*/
+
+int input(u32 input){
+    if (input == 0) {return 0;}
+    else {return 1;}
+}
 
 
 /* move_viewport_stick
@@ -47,10 +57,16 @@ void move_viewport_stick(Viewport *viewport, NUContData *contdata)
 }
 
 
-void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData timedata){
+void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData timedata)
+{
+    float input_x = 0;
+    float input_y = 0;
 
-    float input_x = lim(contdata->button & R_CBUTTONS) - lim(contdata[0].button & L_CBUTTONS);
-    float input_y = lim(contdata->button & U_CBUTTONS) - lim(contdata[0].button & D_CBUTTONS);
+    if ((contdata->button & R_CBUTTONS) || (contdata->button & L_CBUTTONS) || (contdata->button & U_CBUTTONS) || (contdata->button & D_CBUTTONS)){
+        
+        input_x = input(contdata->button & R_CBUTTONS) - input(contdata->button & L_CBUTTONS);
+        input_y = input(contdata->button & U_CBUTTONS) - input(contdata->button & D_CBUTTONS);
+    }
 
     if (input_x == 0) viewport->rotational_target_speed[0] = 0; 
     else viewport->rotational_target_speed[0] = input_x * viewport->speed_settings[0];

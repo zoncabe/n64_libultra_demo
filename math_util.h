@@ -2,13 +2,10 @@
 #define MATH_UTIL_H
 
 
-float get_time();
 float rad(float angle);
 float deg(float rad);
 float qi_sqrt(float number);
 float calculate_diagonal(float x, float y);
-int lim(u32 input);
-
 
   
 /* rad
@@ -51,22 +48,12 @@ float qi_sqrt(float number){
 }
 
 
-
 /* calculate diagonal
  calculates diagonal of a rect triangle given its sides */
 
 float calculate_diagonal(float x, float y){
     float diagonal = 1 / qi_sqrt(x * x +  y * y);
     return diagonal;
-}
-
-
-/* lim
- auxiliary function for 8 directional movement*/
-
-int lim(u32 input){
-    if (input == 0) {return 0;}
-    else {return 1;}
 }
 
 #endif

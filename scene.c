@@ -44,7 +44,7 @@ void set_entity (Entity *entity);
 Viewport viewport = {
 
     distance_from_entity: 250,
-    target_distance: 250,
+    target_distance: 600,
     angle_around_entity: 0,
     offset_angle: 20,
     pitch: 10,
@@ -145,11 +145,11 @@ void update_scene()
 
     set_entity_position(&player, timedata);
 
+
     set_entity_state(&player, player.state);  
 
-    move_viewport_c_buttons(&viewport, &contdata[0], timedata);
-
     //move_viewport_stick(&viewport, &contdata[1]);
+    move_viewport_c_buttons(&viewport, &contdata[0], timedata);
 
     set_viewport_position(&viewport, player, timedata);
 }
@@ -241,22 +241,22 @@ handles the system functions that enters the entity position and rotation values
 
 void set_entity (Entity *entity)
 {
-    guTranslate(&entity->position_mtx, entity->position[0], entity->position[1], entity->position[2]);
+    //guTranslate(&entity->position_mtx, entity->position[0], entity->position[1], entity->position[2]);
     guRotate(&entity->rotation_mtx[0], entity->pitch, 1, 0, 0);
     guRotate(&entity->rotation_mtx[1], entity->yaw, 0, 0, 1);
-    guScale(&entity->scale_mtx, entity->scale, entity->scale, entity->scale);
+    //guScale(&entity->scale_mtx, entity->scale, entity->scale, entity->scale);
 
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    //gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[0]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[1]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    //gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
 
     sausage64_drawmodel(&glistp, &entity->model);
 
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    //gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    //gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 }
 
 
@@ -278,10 +278,30 @@ void set_debug_data(){
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "tick  %d", (int)player.model.animtick);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "x  %d", (int)player.position[0]);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "keyframe  %d", (int)player.model.curkeyframe);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "y  %d", (int)player.position[1]);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "cam x  %d", (int)viewport.position[0]);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 7);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "cam y  %d", (int)viewport.position[1]);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 8);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "cam z  %d", (int)viewport.position[2]);
+
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 9);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target x  %d", (int)viewport.target[0]);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 10);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target y  %d", (int)viewport.target[1]);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 11);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target z  %d", (int)viewport.target[2]);
+    
 /*
 
 
@@ -300,9 +320,6 @@ void set_debug_data(){
     }else {
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "no B");
     }
-
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "speed  %d", (int)player.directional_speed);
 */
 
 }

@@ -98,12 +98,12 @@ void set_viewport_position(Viewport *viewport, Entity entity, TimeData timedata)
 	viewport-> horizontal_target_distance = viewport->target_distance * cosf(rad(viewport->pitch));
 	viewport->vertical_target_distance = viewport->target_distance * sinf(rad(viewport->pitch + 180));
 
-    viewport->position[0] = entity.position[0] - viewport->horizontal_distance_from_entity * sinf(rad(viewport->angle_around_entity - viewport->offset_angle));
-    viewport->position[1] = entity.position[1] - viewport->horizontal_distance_from_entity * cosf(rad(viewport->angle_around_entity - viewport->offset_angle));
+    viewport->position[0] = entity.position[0] - (viewport->horizontal_distance_from_entity * sinf(rad(viewport->angle_around_entity - viewport->offset_angle)));
+    viewport->position[1] = entity.position[1] - (viewport->horizontal_distance_from_entity * cosf(rad(viewport->angle_around_entity - viewport->offset_angle)));
     viewport->position[2] = entity.position[2] + viewport->height + viewport->vertical_distance_from_entity;
 	
-    //this makes the camera collide with an horizontal plane at height 0 simulating the floor
-    //will be modyfied when camera collision happens
+    /* this makes the camera collide with an horizontal plane at height 0 simulating the floor
+    will be modyfied when camera collision happens */
 	while (viewport->position[2] < 0)  {
 
 		viewport->distance_from_entity--; 
