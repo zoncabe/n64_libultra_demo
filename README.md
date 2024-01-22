@@ -1,6 +1,6 @@
 # basic nintendo 64 game demo
 
-this is the bare bones [Buu 342's libultra sausage64 demo rom](https://github.com/buu342/N64-Sausage64), stripped of all the model showcase functions,
+this is the bare bones [Buu 342's Libultra Sausage64 demo rom](https://github.com/buu342/N64-Sausage64), stripped of all the model showcase functions,
 
 so i can add some code to try to make it look like a third person shooter
 
