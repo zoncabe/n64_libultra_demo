@@ -1,5 +1,3 @@
-##
-##
 
 ### basic Nintendo 64 game demo
 
