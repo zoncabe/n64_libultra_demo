@@ -16,3 +16,8 @@ im on lubuntu using [Crashoveride Modern SDK](https://crashoveride95.github.io/m
 #### use this code as you will
 
 give credit to the ones before you :)
+
+
+hit the [N64brew Discord](https://discord.gg/r86zSRwDDY) for more
+
+##
