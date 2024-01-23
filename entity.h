@@ -8,8 +8,9 @@ here are all the structures and functions prototypes that involve the setting up
 // structures
 
 typedef enum {
+
 	EMPTY,
-    IDLE,
+    STAND_IDLE,
     WALKING,
     RUNNING,
 	ROLL,
@@ -18,10 +19,28 @@ typedef enum {
 } EntityState;
 
 typedef enum {
+
 	LEFT,
     RIGHT,
 
 } Foot;
+
+typedef struct {
+
+	float walk_target_speed;
+	float run_target_speed;
+	float idle_to_roll_target_speed;
+	float walk_to_roll_target_speed;
+	float run_to_roll_target_speed;
+	
+	u32 idle_to_roll_change_grip_tick;
+	u32 walk_to_roll_change_grip_tick;
+	u32 run_to_roll_change_grip_tick;
+	u32 walk_grounded_foot_change_tick;
+	u32 run_grounded_foot_change_tick;
+
+}EntitySettings;
+
 
 typedef struct {
 
@@ -32,23 +51,12 @@ typedef struct {
 	EntityState previous_state;
 	EntityState state;
 
-	int A_press;
-	int B_press;
-
-	float walk_target_speed;
-	float run_target_speed;
-	float idle_to_roll_target_speed;
-	float walk_to_roll_target_speed;
-	float run_to_roll_target_speed;
-	
-	int idle_to_roll_change_grip_tick;
-	int walk_to_roll_change_grip_tick;
-	int run_to_roll_change_grip_tick;
-	int walk_grounded_foot_change_tick;
-	int run_grounded_foot_change_tick;
-
 	Foot grounded_foot;
 
+	float input_amount;
+	float input_x;
+	float input_y;
+	
 	float scale;
 	float position[3];
 	float pitch;
@@ -60,26 +68,23 @@ typedef struct {
 	float target_speed[3];
 	float speed[3];
 
-	s64ModelHelper model;
-
     float framerate;
 
-	float input_amount;
-	float input_x;
-	float input_y;
-
 	float directional_speed;
+
+	s64ModelHelper model;
+	EntitySettings settings;
 
 	Mtx model_mtx[];
 
 } Entity;
 
 
-
 // functions prototypes
 
 void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
 void set_entity_position(Entity *entity, TimeData time_data);
+
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/

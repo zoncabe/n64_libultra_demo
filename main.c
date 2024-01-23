@@ -6,7 +6,7 @@ Program entrypoint.
 
 #include <nusys.h>
 #include "config.h"
-#include "scene.h"
+#include "main.h"
 #include "debug.h"
 
 

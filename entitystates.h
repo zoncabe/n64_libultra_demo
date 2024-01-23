@@ -31,7 +31,7 @@ void set_entity_state(Entity *entity, EntityState new_state)
 {
     switch(new_state) {
 
-        case IDLE: {
+        case STAND_IDLE: {
             set_idle_state(entity);
             break;
         }
@@ -61,10 +61,10 @@ void set_idle_state(Entity *entity)
     entity->acceleration[0] = 9 * (0 - entity->speed[0]);
     entity->acceleration[1] = 9 * (0 - entity->speed[1]);
 
-    if (entity->state == IDLE) return;
+    if (entity->state == STAND_IDLE) return;
     
     entity->target_yaw = entity->yaw;
-    entity->state = IDLE;
+    entity->state = STAND_IDLE;
 
     if (entity->grounded_foot == LEFT){
     sausage64_set_anim(&entity->model, ANIMATION_nick_look_around_left);
@@ -74,14 +74,14 @@ void set_idle_state(Entity *entity)
     sausage64_set_anim(&entity->model, ANIMATION_nick_look_around_right);
     }
 
-    entity->previous_state = IDLE;
+    entity->previous_state = STAND_IDLE;
 }
 
 
 void set_walking_state(Entity *entity)
 {
-    entity->target_speed[0] = entity->walk_target_speed * sinf(rad(entity->target_yaw));
-    entity->target_speed[1] = entity->walk_target_speed * -cosf(rad(entity->target_yaw));
+    entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
+    entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
 
     entity->acceleration[0] = 4 * (entity->target_speed[0] - entity->speed[0]);
     entity->acceleration[1] = 4 * (entity->target_speed[1] - entity->speed[1]);
@@ -96,8 +96,8 @@ void set_walking_state(Entity *entity)
 
 void set_running_state(Entity *entity)
 {
-    entity->target_speed[0] = entity->run_target_speed * sinf(rad(entity->target_yaw));
-    entity->target_speed[1] = entity->run_target_speed * -cosf(rad(entity->target_yaw));
+    entity->target_speed[0] = entity->settings.run_target_speed * sinf(rad(entity->target_yaw));
+    entity->target_speed[1] = entity->settings.run_target_speed * -cosf(rad(entity->target_yaw));
 
     entity->acceleration[0] = 6 * (entity->target_speed[0] - entity->speed[0]);
     entity->acceleration[1] = 6 * (entity->target_speed[1] - entity->speed[1]);
@@ -114,21 +114,21 @@ void set_roll_state(Entity *entity)
 {
     switch(entity->previous_state) {
 
-        case IDLE: {
+        case STAND_IDLE: {
 
-            if(entity->model.animtick < entity->idle_to_roll_change_grip_tick){
+            if(entity->model.animtick < entity->settings.idle_to_roll_change_grip_tick){
 
-            entity->target_speed[0] = entity->idle_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->idle_to_roll_target_speed * -cosf(rad(entity->yaw));
+            entity->target_speed[0] = entity->settings.idle_to_roll_target_speed * sinf(rad(entity->yaw));
+            entity->target_speed[1] = entity->settings.idle_to_roll_target_speed * -cosf(rad(entity->yaw));
 
             entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
             } 
 
-            if(entity->model.animtick >= entity->idle_to_roll_change_grip_tick){
+            if(entity->model.animtick >= entity->settings.idle_to_roll_change_grip_tick){
 
-            entity->target_speed[0] = entity->walk_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->walk_target_speed * -cosf(rad(entity->target_yaw));
+            entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
+            entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
 
             entity->acceleration[0] = 2 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 2 * (entity->target_speed[1] - entity->speed[1]);
@@ -145,19 +145,19 @@ void set_roll_state(Entity *entity)
 
         case WALKING: {
 
-            if(entity->model.animtick < entity->walk_to_roll_change_grip_tick){
+            if(entity->model.animtick < entity->settings.walk_to_roll_change_grip_tick){
                 
-            entity->target_speed[0] = entity->walk_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->walk_to_roll_target_speed * -cosf(rad(entity->yaw));
+            entity->target_speed[0] = entity->settings.walk_to_roll_target_speed * sinf(rad(entity->yaw));
+            entity->target_speed[1] = entity->settings.walk_to_roll_target_speed * -cosf(rad(entity->yaw));
 
             entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
             }
 
-            if(entity->model.animtick >= entity->walk_to_roll_change_grip_tick){
+            if(entity->model.animtick >= entity->settings.walk_to_roll_change_grip_tick){
                 
-            entity->target_speed[0] = entity->walk_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->walk_target_speed * -cosf(rad(entity->target_yaw));
+            entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
+            entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
 
             entity->acceleration[0] = 3 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 3 * (entity->target_speed[1] - entity->speed[1]);
@@ -174,19 +174,19 @@ void set_roll_state(Entity *entity)
         case RUNNING: {
             
 
-            if(entity->model.animtick < entity->run_to_roll_change_grip_tick){
+            if(entity->model.animtick < entity->settings.run_to_roll_change_grip_tick){
                 
-            entity->target_speed[0] = entity->run_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->run_to_roll_target_speed * -cosf(rad(entity->yaw));
+            entity->target_speed[0] = entity->settings.run_to_roll_target_speed * sinf(rad(entity->yaw));
+            entity->target_speed[1] = entity->settings.run_to_roll_target_speed * -cosf(rad(entity->yaw));
 
             entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
             }
 
-            if(entity->model.animtick >= entity->run_to_roll_change_grip_tick){
+            if(entity->model.animtick >= entity->settings.run_to_roll_change_grip_tick){
                 
-            entity->target_speed[0] = entity->run_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->run_target_speed * -cosf(rad(entity->target_yaw));
+            entity->target_speed[0] = entity->settings.run_target_speed * sinf(rad(entity->target_yaw));
+            entity->target_speed[1] = entity->settings.run_target_speed * -cosf(rad(entity->target_yaw));
 
             entity->acceleration[0] = 2 * (entity->target_speed[0] - entity->speed[0]);
             entity->acceleration[1] = 2 * (entity->target_speed[1] - entity->speed[1]);

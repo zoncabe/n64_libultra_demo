@@ -1,12 +1,39 @@
-#ifndef UNFLEX_STAGES_H
-#define UNFLEX_STAGES_H
+#ifndef SCENE_H
+#define SCENE_H
 
 
-// Scene functions
-    
-    void init_scene();
-    void update_scene();
-    void render_frame();
-    
-    
+/* SCENE.H
+here are all the structures and functions prototypes that involve the setting up of an entity */
+
+// macros
+
+#define USB_BUFFER_SIZE 256
+
+
+// structures
+
+typedef struct {
+
+	Mtx	position_mtx;
+	Mtx	rotation_mtx[3];
+	Mtx scale_mtx;
+
+	float scale[3];
+	float position[3];
+
+	float pitch;
+	float yaw;
+    float roll;
+
+	Gfx *model;
+
+} Scenery;
+
+
+// function prototypes
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+
+
+
 #endif

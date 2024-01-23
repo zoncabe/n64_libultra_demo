@@ -52,8 +52,8 @@ void move_viewport_stick(Viewport *viewport, NUContData *contdata)
         viewport->rotational_target_speed[1] = input_y;
     }
     
-    if (contdata->trigger & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
-    else set_viewport_state (viewport, THIRD_PERSON_SHOOTER_GAMEPLAY);
+    if (contdata->button & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
+    else set_viewport_state (viewport, THIRD_PERSON_SHOOTER);
 }
 
 
@@ -69,13 +69,13 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
     }
 
     if (input_x == 0) viewport->rotational_target_speed[0] = 0; 
-    else viewport->rotational_target_speed[0] = input_x * viewport->speed_settings[0];
+    else viewport->rotational_target_speed[0] = input_x * viewport->settings.rotational_max_speed[0];
 
 	if (input_y == 0) viewport->rotational_target_speed[1] = 0; 
-    else viewport->rotational_target_speed[1] = input_y * viewport->speed_settings[1];
+    else viewport->rotational_target_speed[1] = input_y * viewport->settings.rotational_max_speed[1];
 
-    if (contdata->trigger & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
-    else set_viewport_state (viewport, THIRD_PERSON_SHOOTER_GAMEPLAY);
+    if (contdata->button & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
+    else set_viewport_state (viewport, THIRD_PERSON_SHOOTER);
 }
 
 
@@ -107,7 +107,7 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
     entity->input_amount = input_amount;
     
     if (input_amount == 0 && entity->state != ROLL){
-        set_entity_state(entity, IDLE);
+        set_entity_state(entity, STAND_IDLE);
     }
 
     else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL){
