@@ -27,11 +27,19 @@ typedef enum {
 
 typedef struct {
 
+	float idle_acceleration_rate;
+	float walk_acceleration_rate;
+	float run_acceleration_rate;
+	float roll_acceleration_rate;
+	float roll_acceleration_grip_rate;
+	float jump_acceleration_rate;
+
 	float walk_target_speed;
 	float run_target_speed;
 	float idle_to_roll_target_speed;
 	float walk_to_roll_target_speed;
 	float run_to_roll_target_speed;
+	float jump_target_speed;
 	
 	u32 idle_to_roll_change_grip_tick;
 	u32 walk_to_roll_change_grip_tick;
@@ -52,26 +60,26 @@ typedef struct {
 	EntityState state;
 
 	Foot grounded_foot;
+	int grounded;
 
 	float input_amount;
 	float input_x;
 	float input_y;
+	int hold;
 	
 	float scale;
 	float position[3];
 	float pitch;
-
 	float target_yaw;
 	float yaw;
     
 	float acceleration[3];
 	float target_speed[3];
 	float speed[3];
-
-    float framerate;
-
 	float directional_speed;
 
+    float framerate;
+	float tick_count;
 	s64ModelHelper model;
 	EntitySettings settings;
 
@@ -113,11 +121,9 @@ void set_entity_position(Entity *entity, TimeData time_data)
     entity->speed[2] += (entity->acceleration[2] * time_data.frame_duration);
 
     if (entity->speed[0] != 0 || entity->speed[1] != 0) {
-
-		// set yaw based on speed
+		
 		entity->yaw = deg(atan2(entity->speed[0], -entity->speed[1]));
-		// debug data collecting
-		//entity->directional_speed = calculate_diagonal(entity->speed[0], entity->speed[1]);
+		entity->directional_speed = calculate_diagonal(entity->speed[0], entity->speed[1]);
 	}
 
     entity->position[0] += entity->speed[0] * time_data.frame_duration;

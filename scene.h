@@ -9,6 +9,8 @@ here are all the structures and functions prototypes that involve the setting up
 
 #define USB_BUFFER_SIZE 256
 
+#define GRAVITY 1000
+
 
 // structures
 

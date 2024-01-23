@@ -80,13 +80,13 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
 
 
 void set_entity_actions(Entity *entity, NUContData *contdata)
-{
-    //if (contdata->trigger & D_CBUTTONS);
-    //if (contdata->trigger & R_TRIG); 
+{    
+    if (contdata->button & A_BUTTON ) entity->hold = 1; 
+    else entity->hold = 0;
     
-    if (contdata->trigger & B_BUTTON) set_entity_state(entity, ROLL);
-    
-    if (contdata->trigger & A_BUTTON) set_entity_state(entity, JUMP);
+    if (contdata->trigger & A_BUTTON && entity->state != ROLL) set_entity_state(entity, JUMP);
+
+    if (contdata->trigger & B_BUTTON && entity->state != JUMP) set_entity_state(entity, ROLL);
 }
 
 
@@ -106,15 +106,15 @@ void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
     //debug data collecting
     entity->input_amount = input_amount;
     
-    if (input_amount == 0 && entity->state != ROLL){
+    if (input_amount == 0 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, STAND_IDLE);
     }
 
-    else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL){
+    else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, WALKING);
     }
 
-    else if (input_amount > 64 && entity->state != ROLL){
+    else if (input_amount > 64 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, RUNNING);
     }
 }

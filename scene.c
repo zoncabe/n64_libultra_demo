@@ -97,11 +97,19 @@ Entity player = {
 
     settings: {
 
+        idle_acceleration_rate: 9,
+        walk_acceleration_rate: 4,
+        run_acceleration_rate: 6,
+        roll_acceleration_rate: 20,
+        roll_acceleration_grip_rate: 2,
+        jump_acceleration_rate: 120, 
+
         walk_target_speed: 120,
         run_target_speed: 260,
         idle_to_roll_target_speed: 140,
         walk_to_roll_target_speed: 160,
         run_to_roll_target_speed: 280,
+        jump_target_speed: 250, 
 
         idle_to_roll_change_grip_tick: 20,
         walk_to_roll_change_grip_tick: 23,
@@ -140,6 +148,11 @@ void entity_animcallback(u16 anim)
         case ANIMATION_nick_run_to_roll_left:
         
             set_entity_state(&player, STAND_IDLE);
+            break;
+            
+        case ANIMATION_nick_jump_left:
+        
+            sausage64_set_anim(&player.model, ANIMATION_nick_fall_idle_left);
             break;
     }
 }
@@ -307,23 +320,24 @@ void set_debug_data(){
     if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
     if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
+    if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "x  %d", (int)player.position[0]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z  %d", (int)player.position[2]);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "y  %d", (int)player.position[1]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z speed  %d", (int)player.speed[2]);
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "offset angle  %d", (int)viewport.offset_angle);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z acceleration  %d", (int)player.acceleration[2]);
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 7);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "zoom distance  %d", (int)viewport.distance_from_entity);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "grounded  %d", (int)player.grounded);
     
-    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 8);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "offset angle  %d", (int)viewport.offset_angle);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "tick count  %d", (int)player.tick_count);
 
+    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 9);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "target x  %d", (int)viewport.target[0]);
     

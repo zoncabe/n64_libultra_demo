@@ -13,18 +13,52 @@ here are all the entity state machine related functions */
 
 // function prototypes
 
-void set_entity_state(Entity *entity, EntityState new_state);
+void calculate_acceleration (Entity *entity, float target_speed, float acceleration_rate);
 
-void set_idle_state(Entity *entity);
+void calculate_acceleration_forward (Entity *entity, float target_speed, float acceleration_rate);
 
-void set_walking_state(Entity *entity);
+void calculate_jump_acceleration (Entity *entity, float target_speed, float acceleration_rate);
+
+void set_entity_state (Entity *entity, EntityState new_state);
+
+void set_idle_state (Entity *entity);
+
+void set_walking_state (Entity *entity);
             
-void set_running_state(Entity *entity);
+void set_running_state (Entity *entity);
 
-void set_roll_state(Entity *entity);
+void set_roll_state (Entity *entity);
 
-void set_grounded_foot(Entity *entity);
+void set_jump_state (Entity *entity);
 
+void set_grounded_foot (Entity *entity);
+
+
+
+void calculate_acceleration(Entity *entity, float target_speed, float acceleration_rate)
+{
+    entity->target_speed[0] = target_speed * sinf(rad(entity->target_yaw));
+    entity->target_speed[1] = target_speed * -cosf(rad(entity->target_yaw));
+
+    entity->acceleration[0] = acceleration_rate * (entity->target_speed[0] - entity->speed[0]);
+    entity->acceleration[1] = acceleration_rate * (entity->target_speed[1] - entity->speed[1]);
+}
+
+
+void calculate_acceleration_forward(Entity *entity, float target_speed, float acceleration_rate)
+{
+    entity->target_speed[0] = target_speed * sinf(rad(entity->yaw));
+    entity->target_speed[1] = target_speed * -cosf(rad(entity->yaw));
+
+    entity->acceleration[0] = acceleration_rate * (entity->target_speed[0] - entity->speed[0]);
+    entity->acceleration[1] = acceleration_rate * (entity->target_speed[1] - entity->speed[1]);
+}
+
+
+void calculate_jump_acceleration(Entity *entity, float target_speed, float acceleration_rate)
+{
+    entity->acceleration[2] = acceleration_rate * (target_speed - entity->speed[2]);
+}
 
 
 void set_entity_state(Entity *entity, EntityState new_state) 
@@ -32,21 +66,25 @@ void set_entity_state(Entity *entity, EntityState new_state)
     switch(new_state) {
 
         case STAND_IDLE: {
-            set_idle_state(entity);
+            set_idle_state (entity);
             break;
         }
         case WALKING: {
-            set_walking_state(entity);
+            set_walking_state (entity);
             break;
         }
         case RUNNING: {
-            set_running_state(entity);
+            set_running_state (entity);
             break;
         }
         case ROLL: {
-            set_roll_state(entity);
+            set_roll_state (entity);
             break;
         }
+        case JUMP: {
+            set_jump_state (entity);
+            break;
+        }    
     }
 }
 
@@ -58,8 +96,8 @@ void set_idle_state(Entity *entity)
         entity->speed[1] = 0;
     }
     
-    entity->acceleration[0] = 9 * (0 - entity->speed[0]);
-    entity->acceleration[1] = 9 * (0 - entity->speed[1]);
+    entity->acceleration[0] = entity->settings.idle_acceleration_rate * (0 - entity->speed[0]);
+    entity->acceleration[1] = entity->settings.idle_acceleration_rate * (0 - entity->speed[1]);
 
     if (entity->state == STAND_IDLE) return;
     
@@ -80,11 +118,7 @@ void set_idle_state(Entity *entity)
 
 void set_walking_state(Entity *entity)
 {
-    entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
-    entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
-
-    entity->acceleration[0] = 4 * (entity->target_speed[0] - entity->speed[0]);
-    entity->acceleration[1] = 4 * (entity->target_speed[1] - entity->speed[1]);
+    calculate_acceleration(entity, entity->settings.walk_target_speed, entity->settings.walk_acceleration_rate);
 
     if (entity->state == WALKING) return;
     
@@ -96,11 +130,7 @@ void set_walking_state(Entity *entity)
 
 void set_running_state(Entity *entity)
 {
-    entity->target_speed[0] = entity->settings.run_target_speed * sinf(rad(entity->target_yaw));
-    entity->target_speed[1] = entity->settings.run_target_speed * -cosf(rad(entity->target_yaw));
-
-    entity->acceleration[0] = 6 * (entity->target_speed[0] - entity->speed[0]);
-    entity->acceleration[1] = 6 * (entity->target_speed[1] - entity->speed[1]);
+    calculate_acceleration (entity, entity->settings.run_target_speed, entity->settings.run_acceleration_rate);
 
     if (entity->state == RUNNING) return;
     
@@ -116,52 +146,23 @@ void set_roll_state(Entity *entity)
 
         case STAND_IDLE: {
 
-            if(entity->model.animtick < entity->settings.idle_to_roll_change_grip_tick){
+            if(entity->model.animtick < entity->settings.idle_to_roll_change_grip_tick)  calculate_acceleration_forward (entity, entity->settings.idle_to_roll_target_speed, entity->settings.roll_acceleration_rate);
 
-            entity->target_speed[0] = entity->settings.idle_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->settings.idle_to_roll_target_speed * -cosf(rad(entity->yaw));
-
-            entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
-            } 
-
-            if(entity->model.animtick >= entity->settings.idle_to_roll_change_grip_tick){
-
-            entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
-
-            entity->acceleration[0] = 2 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 2 * (entity->target_speed[1] - entity->speed[1]);
-            }
+            if(entity->model.animtick >= entity->settings.idle_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate);
         
             if (entity->state == ROLL) return;
 
             entity->state = ROLL;
-            
-            sausage64_set_anim_tick(&entity->model, ANIMATION_nick_stand_to_roll_left, 30);           
+            sausage64_set_anim_tick(&entity->model, ANIMATION_nick_stand_to_roll_left, 0);           
 
             break;
         }
 
         case WALKING: {
 
-            if(entity->model.animtick < entity->settings.walk_to_roll_change_grip_tick){
-                
-            entity->target_speed[0] = entity->settings.walk_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->settings.walk_to_roll_target_speed * -cosf(rad(entity->yaw));
+            if(entity->model.animtick < entity->settings.walk_to_roll_change_grip_tick) calculate_acceleration_forward (entity, entity->settings.walk_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
 
-            entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
-            }
-
-            if(entity->model.animtick >= entity->settings.walk_to_roll_change_grip_tick){
-                
-            entity->target_speed[0] = entity->settings.walk_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->settings.walk_target_speed * -cosf(rad(entity->target_yaw));
-
-            entity->acceleration[0] = 3 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 3 * (entity->target_speed[1] - entity->speed[1]);
-            }
+            if (entity->model.animtick >= entity->settings.walk_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate); 
         
             if (entity->state == ROLL) return;
         
@@ -174,23 +175,9 @@ void set_roll_state(Entity *entity)
         case RUNNING: {
             
 
-            if(entity->model.animtick < entity->settings.run_to_roll_change_grip_tick){
-                
-            entity->target_speed[0] = entity->settings.run_to_roll_target_speed * sinf(rad(entity->yaw));
-            entity->target_speed[1] = entity->settings.run_to_roll_target_speed * -cosf(rad(entity->yaw));
+            if(entity->model.animtick < entity->settings.run_to_roll_change_grip_tick) calculate_acceleration_forward (entity, entity->settings.run_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
 
-            entity->acceleration[0] = 20 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 20 * (entity->target_speed[1] - entity->speed[1]);
-            }
-
-            if(entity->model.animtick >= entity->settings.run_to_roll_change_grip_tick){
-                
-            entity->target_speed[0] = entity->settings.run_target_speed * sinf(rad(entity->target_yaw));
-            entity->target_speed[1] = entity->settings.run_target_speed * -cosf(rad(entity->target_yaw));
-
-            entity->acceleration[0] = 2 * (entity->target_speed[0] - entity->speed[0]);
-            entity->acceleration[1] = 2 * (entity->target_speed[1] - entity->speed[1]);
-            }
+            if(entity->model.animtick >= entity->settings.run_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.run_target_speed, entity->settings.roll_acceleration_grip_rate);
 
             if (entity->state == ROLL) return;
         
@@ -200,11 +187,45 @@ void set_roll_state(Entity *entity)
             break;
         }
     }
-
-    void set_grounded_foot(Entity *entity)
-    {
-        // TO DO 
-    }
 }
+
+
+void set_jump_state(Entity *entity) 
+{
+    calculate_acceleration (entity, entity->directional_speed, 0.5);
+    
+    if (entity->hold == 1 && entity->tick_count < 8) calculate_jump_acceleration (entity, entity->settings.jump_target_speed, entity->settings.jump_acceleration_rate);
+    else {entity->acceleration[2] = -GRAVITY;}
+
+    entity->hold = 0;
+    entity->tick_count ++;
+    entity->grounded = 0;
+
+    if (entity->position[2] < 0) {
+
+        entity->grounded = 1;
+        entity->tick_count = 0;
+
+        entity->acceleration[2] = 0;
+        entity->speed[2] = 0;
+        entity->position[2] = 0;
+
+        set_entity_state (entity, STAND_IDLE);
+        return;
+    }
+
+    if (entity->state == JUMP || entity->grounded == 1) return;
+    
+    entity->state = JUMP;
+    sausage64_set_anim (&entity->model, ANIMATION_nick_jump_left);
+    entity->previous_state = JUMP;
+}
+
+
+void set_grounded_foot(Entity *entity)
+{
+    // TO DO 
+}
+
 
 #endif
