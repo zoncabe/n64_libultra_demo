@@ -52,7 +52,7 @@ void move_viewport_stick(Viewport *viewport, NUContData *contdata)
         viewport->rotational_target_speed[1] = input_y;
     }
     
-    if (contdata->button & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
+    if (contdata->button & Z_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
     else set_viewport_state (viewport, THIRD_PERSON_SHOOTER);
 }
 
@@ -74,7 +74,7 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
 	if (input_y == 0) viewport->rotational_target_speed[1] = 0; 
     else viewport->rotational_target_speed[1] = input_y * viewport->settings.rotational_max_speed[1];
 
-    if (contdata->button & L_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
+    if (contdata->button & Z_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
     else set_viewport_state (viewport, THIRD_PERSON_SHOOTER);
 }
 

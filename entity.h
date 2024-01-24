@@ -33,6 +33,7 @@ typedef struct {
 	float roll_acceleration_rate;
 	float roll_acceleration_grip_rate;
 	float jump_acceleration_rate;
+	float aerial_control_rate;
 
 	float walk_target_speed;
 	float run_target_speed;

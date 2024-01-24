@@ -12,10 +12,12 @@ handles the demo scene */
 #include "sausage64.h"
 #include "debug.h"
 #include "scene.h"
+#include "n64_logo.h"
 
 #include "nickTex.h"
 #include "nickMdl.h"
-#include "axisMdl.h"
+#include "shapesMdl.h"
+#include "terrain.h"
 
 #include "math_util.h"
 #include "time.h"
@@ -52,7 +54,7 @@ Viewport viewport = {
 
     distance_from_entity: 250,
     target_distance: 600,
-    angle_around_entity: 0,
+    angle_around_entity: 30,
     offset_angle: 20,
     pitch: 10,
     height: 90,
@@ -60,7 +62,7 @@ Viewport viewport = {
     settings: {
 
         rotational_acceleration_rate: 8,
-        rotational_max_speed: {80, 80},
+        rotational_max_speed: {120, 100},
 
         zoom_acceleration_rate: 30,
         zoom_deceleration_rate: 10,
@@ -83,7 +85,7 @@ Viewport viewport = {
 
 LightData light = {
 
-    angle: {60, 60, 60},
+    angle: {60, 60, 60,},
 };
 
 
@@ -91,7 +93,9 @@ Entity player = {
 
     scale: 1,
 
-    yaw: 180,
+    position: {-300, -500, 0,},
+    
+    yaw: 150,
 
     framerate: 0.5,
 
@@ -102,14 +106,15 @@ Entity player = {
         run_acceleration_rate: 6,
         roll_acceleration_rate: 20,
         roll_acceleration_grip_rate: 2,
-        jump_acceleration_rate: 120, 
+        jump_acceleration_rate: 110,
+        aerial_control_rate: 0.5,
 
         walk_target_speed: 120,
         run_target_speed: 260,
         idle_to_roll_target_speed: 140,
         walk_to_roll_target_speed: 160,
         run_to_roll_target_speed: 280,
-        jump_target_speed: 250, 
+        jump_target_speed: 300, 
 
         idle_to_roll_change_grip_tick: 20,
         walk_to_roll_change_grip_tick: 23,
@@ -120,16 +125,75 @@ Entity player = {
     },
 };
 
-Scenery axis = {
+Mtx playerMtx[MESHCOUNT_nick];
 
+#define AXIS_COUNT 8
+
+Scenery axis_cube[AXIS_COUNT] = {
+
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100, -100,   0}, yaw:   0, pitch: 0, roll:   0,},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100, -100,   0}, yaw:  90, pitch: 0, roll:   0,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100,  100,   0}, yaw: 180, pitch: 0, roll:   0,},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100,  100,   0}, yaw: 270, pitch: 0, roll:   0,},
+    
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100, 200}, yaw: 270, pitch: 0, roll: 180,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100, 200}, yaw:   0, pitch: 0, roll: 180,},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100, 200}, yaw:  90, pitch: 0, roll: 180,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100, 200}, yaw: 180, pitch: 0, roll: 180,},
+    
+    
+};
+
+Scenery cube = {
+
+    yaw: 10,
+    pitch: 72,
+    roll: 36,
     scale: {1 ,1 ,1},
-    model: gfx_axis,
+    position: {0, 0, 100},
+
+    rotational_speed: {270, 50, 190,},
+
+    model: gfx_cube,
 };
 
 
+void rotate_cube(){
 
+    if ( cube.rotational_speed[0] > 270){
 
-Mtx nickMtx[MESHCOUNT_nick];
+        cube.rotational_speed[0] -= 50;
+        cube.rotational_speed[1] -= 50;
+        cube.rotational_speed[2] -= 50;
+    }
+
+    cube.yaw += cube.rotational_speed[0] * timedata.frame_duration;
+    cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
+    cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
+}
+/*
+int swap_cube_index = 0;
+
+void swap_cube(){
+
+    cube.scale_speed = 0;
+
+    if ( cube.rotational_speed[0] < 1270){
+
+        cube.rotational_speed[0] += 50;
+        cube.rotational_speed[1] += 50;
+        cube.rotational_speed[2] += 50;
+    }
+
+    cube.yaw += cube.rotational_speed[0] * timedata.frame_duration;
+    cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
+    cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
+
+    swap_cube_index = 0;
+
+    cube.model = gfx_n64_logo;
+}
+*/
 
 
 /* entity_animcallback
@@ -180,8 +244,7 @@ void set_viewport(Viewport *viewport)
     gSPPerspNormalize(glistp++, &viewport->normal);
 
     guMtxIdent(&viewport->modeling);
-    gSPMatrix(glistp++, &viewport->modeling, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    
+    gSPMatrix(glistp++, &viewport->modeling, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);  
 }
 
 
@@ -193,8 +256,8 @@ void set_light(LightData *light)
     int i;
 
     //color
-    for (i=0; i<3; i++)
-    {
+    for (i=0; i<3; i++) {
+
         // Ambient color
         light->amb.l.col[i] = 140;
         light->amb.l.colc[i] = 140;
@@ -213,8 +276,7 @@ void set_light(LightData *light)
     gSPNumLights(glistp++, NUMLIGHTS_1);
     gSPLight(glistp++, &light->dir, 1);
     gSPLight(glistp++, &light->amb, 2);
-    gDPPipeSync(glistp++);
-    
+    gDPPipeSync(glistp++); 
 }
 
 
@@ -250,13 +312,13 @@ void set_scenery (Scenery *scenery)
     guTranslate(&scenery->position_mtx, scenery->position[0], scenery->position[1], scenery->position[2]);
     guRotate(&scenery->rotation_mtx[0], scenery->pitch, 1, 0, 0);
     guRotate(&scenery->rotation_mtx[1], scenery->yaw, 0, 0, 1);
-    //guRotate(&scenery->rotation_mtx[2], scenery->roll, 0, 1, 0);
+    guRotate(&scenery->rotation_mtx[2], scenery->roll, 0, 1, 0);
     guScale(&scenery->scale_mtx, scenery->scale[0], scenery->scale[1], scenery->scale[2]);
 
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[0]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[1]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    //gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[2]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[2]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
 
     gSPDisplayList(glistp++, scenery->model);
@@ -265,6 +327,7 @@ void set_scenery (Scenery *scenery)
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 }
 
 
@@ -291,8 +354,12 @@ void set_scene()
 
     set_entity(&player);
 
-    //gSPDisplayList(glistp++, axis.model);
-    set_scenery (&axis);
+    for (int i = 0; i < AXIS_COUNT; i++) {
+
+        set_scenery(&axis_cube[i]);
+    }
+
+    set_scenery (&cube);
 
       // Syncronize the RCP and CPU and specify that our display list has ended
     gDPFullSync(glistp++);
@@ -304,11 +371,11 @@ void set_scene()
 
 }
 
-/* set_debug_data      
+/* print_debug_data      
 sets debug information to be shown on screen */
 
-void set_debug_data(){
-
+void print_debug_data()
+{
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "time  %d", (int) get_time());
     
@@ -316,7 +383,7 @@ void set_debug_data(){
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-    if(player.state == STAND_IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "IDLE");
+    if(player.state == STAND_IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "STAND IDLE");
     if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
     if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
@@ -356,8 +423,8 @@ void init_scene(void)
 {
     // Initialize nick
 
-    //init_entity(&player, 15, nickMtx, entity_animcallback);
-    sausage64_initmodel(&player.model, MODEL_nick, nickMtx);
+    //init_entity(&player, 15, playerMtx, entity_animcallback);
+    sausage64_initmodel(&player.model, MODEL_nick, playerMtx);
 
     player.model.transition_tick_count = 300;
     player.model.transition_tick_count = 300;
@@ -394,13 +461,20 @@ void update_scene()
 
     set_entity_position(&player, timedata);
 
-
     set_entity_state(&player, player.state);  
 
     //move_viewport_stick(&viewport, &contdata[1]);
     move_viewport_c_buttons(&viewport, &contdata[0], timedata);
 
     set_viewport_position(&viewport, player, timedata);
+
+    /*
+    if (contdata[0].button & R_TRIG) swap_cube_index = 1;
+    
+    if (swap_cube_index == 1) swap_cube();
+    else 
+    */
+    rotate_cube();
 }
 
 
@@ -435,7 +509,7 @@ void render_frame(void)
     // Draw the menu (doesn't work on PAL)
     #if TV_TYPE != PAL
         nuDebConClear(NU_DEB_CON_WINDOW0);
-        set_debug_data();
+        print_debug_data();
         nuDebConDisp(NU_SC_SWAPBUFFER);
     #endif
 }

@@ -146,9 +146,11 @@ void set_roll_state(Entity *entity)
 
         case STAND_IDLE: {
 
-            if(entity->model.animtick < entity->settings.idle_to_roll_change_grip_tick)  calculate_acceleration_forward (entity, entity->settings.idle_to_roll_target_speed, entity->settings.roll_acceleration_rate);
+            if(entity->model.animtick < entity->settings.idle_to_roll_change_grip_tick) 
+                calculate_acceleration_forward (entity, entity->settings.idle_to_roll_target_speed, entity->settings.roll_acceleration_rate);
 
-            if(entity->model.animtick >= entity->settings.idle_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate);
+            if(entity->model.animtick >= entity->settings.idle_to_roll_change_grip_tick) 
+                calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate);
         
             if (entity->state == ROLL) return;
 
@@ -160,9 +162,11 @@ void set_roll_state(Entity *entity)
 
         case WALKING: {
 
-            if(entity->model.animtick < entity->settings.walk_to_roll_change_grip_tick) calculate_acceleration_forward (entity, entity->settings.walk_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
+            if(entity->model.animtick < entity->settings.walk_to_roll_change_grip_tick) 
+                calculate_acceleration_forward (entity, entity->settings.walk_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
 
-            if (entity->model.animtick >= entity->settings.walk_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate); 
+            if (entity->model.animtick >= entity->settings.walk_to_roll_change_grip_tick) 
+                calculate_acceleration (entity, entity->settings.walk_target_speed, entity->settings.roll_acceleration_grip_rate); 
         
             if (entity->state == ROLL) return;
         
@@ -175,9 +179,11 @@ void set_roll_state(Entity *entity)
         case RUNNING: {
             
 
-            if(entity->model.animtick < entity->settings.run_to_roll_change_grip_tick) calculate_acceleration_forward (entity, entity->settings.run_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
+            if(entity->model.animtick < entity->settings.run_to_roll_change_grip_tick) 
+                calculate_acceleration_forward (entity, entity->settings.run_to_roll_target_speed, entity->settings.roll_acceleration_rate); 
 
-            if(entity->model.animtick >= entity->settings.run_to_roll_change_grip_tick) calculate_acceleration (entity, entity->settings.run_target_speed, entity->settings.roll_acceleration_grip_rate);
+            if(entity->model.animtick >= entity->settings.run_to_roll_change_grip_tick) 
+                calculate_acceleration (entity, entity->settings.run_target_speed, entity->settings.roll_acceleration_grip_rate);
 
             if (entity->state == ROLL) return;
         
@@ -192,10 +198,12 @@ void set_roll_state(Entity *entity)
 
 void set_jump_state(Entity *entity) 
 {
-    calculate_acceleration (entity, entity->directional_speed, 0.5);
+    calculate_acceleration (entity, entity->directional_speed, entity->settings.aerial_control_rate);
     
-    if (entity->hold == 1 && entity->tick_count < 8) calculate_jump_acceleration (entity, entity->settings.jump_target_speed, entity->settings.jump_acceleration_rate);
-    else {entity->acceleration[2] = -GRAVITY;}
+    if (entity->hold == 1 && entity->tick_count < 15) 
+        calculate_jump_acceleration (entity, entity->settings.jump_target_speed, entity->settings.jump_acceleration_rate);
+    
+    else entity->acceleration[2] = -GRAVITY;
 
     entity->hold = 0;
     entity->tick_count ++;
@@ -218,7 +226,7 @@ void set_jump_state(Entity *entity)
     
     entity->state = JUMP;
     sausage64_set_anim (&entity->model, ANIMATION_nick_jump_left);
-    entity->previous_state = JUMP;
+    //entity->previous_state = JUMP;
 }
 
 

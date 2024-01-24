@@ -14,6 +14,8 @@ here are all the structures and functions prototypes that involve the setting up
 
 // structures
 
+/*
+
 typedef struct {
 
 	Mtx	position_mtx;
@@ -30,6 +32,33 @@ typedef struct {
 	Gfx *model;
 
 } Scenery;
+*/
+
+
+typedef struct {
+
+	Mtx	position_mtx;
+	Mtx	rotation_mtx[3];
+	Mtx scale_mtx;
+
+	float scale[3];
+	float scale_speed;
+
+	float position[3];
+	float acceleration[3];
+	float speed[3];
+
+	float pitch;
+	float yaw;
+    float roll;
+	float rotational_speed[3];
+	float rotational_acceleration[3];
+
+	Gfx *model;
+
+} Scenery;
+
+//} interactive_object;
 
 
 // function prototypes
