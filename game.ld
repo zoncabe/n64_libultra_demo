@@ -82,5 +82,4 @@ SECTIONS
    /* Discard everything not specifically mentioned above. 
    */
    END_NOLOAD(code)
-
 }
