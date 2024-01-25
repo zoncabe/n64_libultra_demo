@@ -11,7 +11,7 @@ int input(u32 input);
 void move_viewport_stick(Viewport *viewport, NUContData *contdata);
 void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData timedata);
 void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata);
-void set_entity_actions(Entity *entity, NUContData *contdata);
+void set_entity_actions(Entity *entity, NUContData *contdata, TimeData timedata);
 
 
 
@@ -79,12 +79,23 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
 }
 
 
-void set_entity_actions(Entity *entity, NUContData *contdata)
+void set_entity_actions(Entity *entity, NUContData *contdata, TimeData timedata)
 {    
-    if (contdata->button & A_BUTTON ) entity->hold = 1; 
-    else entity->hold = 0;
-    
-    if (contdata->trigger & A_BUTTON && entity->state != ROLL) set_entity_state(entity, JUMP);
+    /*
+    if (contdata->trigger & A_BUTTON && entity->state != ROLL) {
+
+        entity->hold = 1; 
+        entity->hold_time += timedata.frame_duration;
+    }
+    */
+
+    if (contdata->button & A_BUTTON ) {
+
+        entity->hold = 1; 
+        entity->hold_time += timedata.frame_duration;
+        set_entity_state(entity, JUMP);
+    }
+    else entity->release = 1;
 
     if (contdata->trigger & B_BUTTON && entity->state != JUMP) set_entity_state(entity, ROLL);
 }

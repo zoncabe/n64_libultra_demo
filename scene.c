@@ -402,7 +402,7 @@ void print_debug_data()
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "grounded  %d", (int)player.grounded);
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 8);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "tick count  %d", (int)player.tick_count);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "hold time  %d", (int)(100 * player.hold_time));
 
     /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 9);
@@ -457,7 +457,7 @@ void update_scene()
 
     move_entity_stick(&player, viewport, &contdata[0]);
 
-    set_entity_actions(&player, &contdata[0]);
+    set_entity_actions(&player, &contdata[0], timedata);
 
     set_entity_position(&player, timedata);
 

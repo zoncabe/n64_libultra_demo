@@ -66,7 +66,9 @@ typedef struct {
 	float input_amount;
 	float input_x;
 	float input_y;
+	float hold_time;
 	int hold;
+	int release;
 	
 	float scale;
 	float position[3];
@@ -80,7 +82,6 @@ typedef struct {
 	float directional_speed;
 
     float framerate;
-	float tick_count;
 	s64ModelHelper model;
 	EntitySettings settings;
 

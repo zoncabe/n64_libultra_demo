@@ -199,7 +199,7 @@ void detect_collisions()
 {
     StaticEntity *shack = &scenery[SCENERY_COUNT - 1];
 
-    if ( pt_in_rect(nick.entity.pos, &scenery[SCENERY_COUNT - 1].entity, get_static_entity_width(shack), get_static_entity_depth(shack))) {
+    if ( pt_in_rect(nick.entity.pos, &scenery[SCENERY_COUNT - 1].entity, 500, 500)) {
         // just do the oposite of what we did to move this frame to get out of the wall
         Entity *entity = &nick.entity;
         // calculate if the next frame will move us out of the box

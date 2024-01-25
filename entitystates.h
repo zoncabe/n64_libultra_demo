@@ -200,19 +200,19 @@ void set_jump_state(Entity *entity)
 {
     calculate_acceleration (entity, entity->directional_speed, entity->settings.aerial_control_rate);
     
-    if (entity->hold == 1 && entity->tick_count < 15) 
+    if (entity->hold == 1 && entity->release == 0 && entity->hold_time < 0.33) 
         calculate_jump_acceleration (entity, entity->settings.jump_target_speed, entity->settings.jump_acceleration_rate);
     
     else entity->acceleration[2] = -GRAVITY;
 
     entity->hold = 0;
-    entity->tick_count ++;
     entity->grounded = 0;
 
     if (entity->position[2] < 0) {
 
         entity->grounded = 1;
-        entity->tick_count = 0;
+        entity->hold_time = 0;
+        entity->release = 0;
 
         entity->acceleration[2] = 0;
         entity->speed[2] = 0;
