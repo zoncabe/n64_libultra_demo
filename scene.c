@@ -396,10 +396,10 @@ void print_debug_data()
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
     }
 
-    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z speed  %d", (int)player.speed[2]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "time_held  %d", (int)(player.input.time_held * 1000));
     
+    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "z acceleration  %d", (int)player.acceleration[2]);
     

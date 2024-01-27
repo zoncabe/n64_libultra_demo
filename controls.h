@@ -81,22 +81,20 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
 
 void set_entity_actions(Entity *entity, NUContData *contdata, TimeData timedata)
 {    
-    /*
-    if (contdata->button & A_BUTTON && (entity->state == ROLL || entity->state == JUMP)) {
-        entity->input.invalid_input = 1;
+    if (contdata->trigger & A_BUTTON && entity->state != ROLL && entity->state != JUMP) {
+        
+        entity->input.hold = 1; 
+        set_entity_state(entity, JUMP);
     }
-    */
 
-    if (contdata->button & A_BUTTON && entity->state != ROLL) {
+    if (contdata->button & A_BUTTON && entity->state == JUMP) {
 
         entity->input.hold = 1; 
         entity->input.time_held += timedata.frame_duration;
-        set_entity_state(entity, JUMP);
     }
     else {
         
-        entity->input.invalid_input = 0;
-        entity->input.released = 1;    
+        entity->input.hold = 0;    
     }
 
     if (contdata->trigger & B_BUTTON && entity->state != JUMP) set_entity_state(entity, ROLL);
