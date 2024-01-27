@@ -26,6 +26,7 @@ handles the demo scene */
 #include "entitystates.h"
 #include "viewportstates.h"
 #include "controls.h"
+#include "collision.h"
 
 
 // macros
@@ -106,7 +107,7 @@ Entity player = {
         run_acceleration_rate: 6,
         roll_acceleration_rate: 20,
         roll_acceleration_grip_rate: 2,
-        jump_acceleration_rate: 110,
+        jump_acceleration_rate: 40,
         aerial_control_rate: 0.5,
 
         walk_target_speed: 120,
@@ -114,7 +115,7 @@ Entity player = {
         idle_to_roll_target_speed: 140,
         walk_to_roll_target_speed: 160,
         run_to_roll_target_speed: 280,
-        jump_target_speed: 300, 
+        jump_target_speed: 350, 
 
         idle_to_roll_change_grip_tick: 20,
         walk_to_roll_change_grip_tick: 23,
@@ -122,6 +123,7 @@ Entity player = {
 
         walk_grounded_foot_change_tick: 15,
         run_grounded_foot_change_tick: 10,
+        jump_timer_max: 0.20,
     },
 };
 
@@ -372,7 +374,7 @@ void set_scene()
 }
 
 /* print_debug_data      
-sets debug information to be shown on screen */
+sets debug information to be printed on screen */
 
 void print_debug_data()
 {
@@ -389,9 +391,12 @@ void print_debug_data()
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
     if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
 
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z  %d", (int)player.position[2]);
+    if (collision_point_and_circle(player.position, cube.position, 200)) {
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
+    }
 
+    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "z speed  %d", (int)player.speed[2]);
     
@@ -404,9 +409,9 @@ void print_debug_data()
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 8);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "hold time  %d", (int)(100 * player.hold_time));
 
-    /*
+
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 9);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target x  %d", (int)viewport.target[0]);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 10);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "target y  %d", (int)viewport.target[1]);
@@ -460,6 +465,7 @@ void update_scene()
     set_entity_actions(&player, &contdata[0], timedata);
 
     set_entity_position(&player, timedata);
+
 
     set_entity_state(&player, player.state);  
 

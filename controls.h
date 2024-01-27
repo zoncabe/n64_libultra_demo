@@ -34,22 +34,22 @@ changes the viewport variables depending on controller input*/
 void move_viewport_stick(Viewport *viewport, NUContData *contdata)
 {
     int deadzone = 8;
-    float input_x = 0;
-    float input_y = 0;
+    float stick_x = 0;
+    float stick_y = 0;
 
     if (fabs(contdata->stick_x) >= deadzone || fabs(contdata->stick_y) >= deadzone) {
-        input_x = contdata->stick_x;
-        input_y = contdata->stick_y;
+        stick_x = contdata->stick_x;
+        stick_y = contdata->stick_y;
     }
 
-    if (input_x == 0 && input_y == 0) {
+    if (stick_x == 0 && stick_y == 0) {
         viewport->rotational_target_speed[0] = 0;
         viewport->rotational_target_speed[1] = 0;
     }
     
-    else if (input_x != 0 || input_y != 0) {
-        viewport->rotational_target_speed[0] = input_x;
-        viewport->rotational_target_speed[1] = input_y;
+    else if (stick_x != 0 || stick_y != 0) {
+        viewport->rotational_target_speed[0] = stick_x;
+        viewport->rotational_target_speed[1] = stick_y;
     }
     
     if (contdata->button & Z_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
@@ -59,20 +59,20 @@ void move_viewport_stick(Viewport *viewport, NUContData *contdata)
 
 void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData timedata)
 {
-    float input_x = 0;
-    float input_y = 0;
+    float stick_x = 0;
+    float stick_y = 0;
 
     if ((contdata->button & R_CBUTTONS) || (contdata->button & L_CBUTTONS) || (contdata->button & U_CBUTTONS) || (contdata->button & D_CBUTTONS)){
         
-        input_x = input(contdata->button & R_CBUTTONS) - input(contdata->button & L_CBUTTONS);
-        input_y = input(contdata->button & U_CBUTTONS) - input(contdata->button & D_CBUTTONS);
+        stick_x = input(contdata->button & R_CBUTTONS) - input(contdata->button & L_CBUTTONS);
+        stick_y = input(contdata->button & U_CBUTTONS) - input(contdata->button & D_CBUTTONS);
     }
 
-    if (input_x == 0) viewport->rotational_target_speed[0] = 0; 
-    else viewport->rotational_target_speed[0] = input_x * viewport->settings.rotational_max_speed[0];
+    if (stick_x == 0) viewport->rotational_target_speed[0] = 0; 
+    else viewport->rotational_target_speed[0] = stick_x * viewport->settings.rotational_max_speed[0];
 
-	if (input_y == 0) viewport->rotational_target_speed[1] = 0; 
-    else viewport->rotational_target_speed[1] = input_y * viewport->settings.rotational_max_speed[1];
+	if (stick_y == 0) viewport->rotational_target_speed[1] = 0; 
+    else viewport->rotational_target_speed[1] = stick_y * viewport->settings.rotational_max_speed[1];
 
     if (contdata->button & Z_TRIG) set_viewport_state (viewport, THIRD_PERSON_SHOOTER_AIMING);
     else set_viewport_state (viewport, THIRD_PERSON_SHOOTER);
@@ -82,20 +82,22 @@ void move_viewport_c_buttons(Viewport *viewport, NUContData *contdata, TimeData 
 void set_entity_actions(Entity *entity, NUContData *contdata, TimeData timedata)
 {    
     /*
-    if (contdata->trigger & A_BUTTON && entity->state != ROLL) {
-
-        entity->hold = 1; 
-        entity->hold_time += timedata.frame_duration;
+    if (contdata->button & A_BUTTON && (entity->state == ROLL || entity->state == JUMP)) {
+        entity->input.invalid_input = 1;
     }
     */
 
-    if (contdata->button & A_BUTTON ) {
+    if (contdata->button & A_BUTTON && entity->state != ROLL) {
 
-        entity->hold = 1; 
-        entity->hold_time += timedata.frame_duration;
+        entity->input.hold = 1; 
+        entity->input.time_held += timedata.frame_duration;
         set_entity_state(entity, JUMP);
     }
-    else entity->release = 1;
+    else {
+        
+        entity->input.invalid_input = 0;
+        entity->input.released = 1;    
+    }
 
     if (contdata->trigger & B_BUTTON && entity->state != JUMP) set_entity_state(entity, ROLL);
 }
@@ -107,25 +109,25 @@ changes the entity state and target yaw depending on controller input */
 void move_entity_stick(Entity *entity, Viewport viewport, NUContData *contdata)
 {
     int deadzone = 8;
-    float input_amount = 0; 
+    float stick_total = 0; 
 
     if (fabs(contdata->stick_x) >= deadzone || fabs(contdata->stick_y) >= deadzone) {
-        input_amount = calculate_diagonal(contdata->stick_x ,contdata->stick_y);
+        stick_total = calculate_diagonal(contdata->stick_x ,contdata->stick_y);
         entity->target_yaw = deg(atan2(contdata->stick_x, -contdata->stick_y) - rad(viewport.angle_around_entity - (viewport.offset_angle / 2)));
     }
 
     //debug data collecting
-    entity->input_amount = input_amount;
+    entity->input.stick_total = stick_total;
     
-    if (input_amount == 0 && entity->state != ROLL && entity->state != JUMP){
+    if (stick_total == 0 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, STAND_IDLE);
     }
 
-    else if (input_amount > 0 && input_amount <= 64 && entity->state != ROLL && entity->state != JUMP){
+    else if (stick_total > 0 && stick_total <= 64 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, WALKING);
     }
 
-    else if (input_amount > 64 && entity->state != ROLL && entity->state != JUMP){
+    else if (stick_total > 64 && entity->state != ROLL && entity->state != JUMP){
         set_entity_state(entity, RUNNING);
     }
 }

@@ -47,8 +47,22 @@ typedef struct {
 	u32 run_to_roll_change_grip_tick;
 	u32 walk_grounded_foot_change_tick;
 	u32 run_grounded_foot_change_tick;
+	float jump_timer_max;
 
 }EntitySettings;
+
+
+typedef struct {
+
+	float stick_total;
+	float stick_x;
+	float stick_y;
+	float time_held;
+	int hold;
+	int released;
+	int invalid_input;
+
+}Entityinput;
 
 
 typedef struct {
@@ -62,13 +76,6 @@ typedef struct {
 
 	Foot grounded_foot;
 	int grounded;
-
-	float input_amount;
-	float input_x;
-	float input_y;
-	float hold_time;
-	int hold;
-	int release;
 	
 	float scale;
 	float position[3];
@@ -84,6 +91,7 @@ typedef struct {
     float framerate;
 	s64ModelHelper model;
 	EntitySettings settings;
+	Entityinput input;
 
 	Mtx model_mtx[];
 
@@ -92,12 +100,8 @@ typedef struct {
 
 // functions prototypes
 
-void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
+//void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(u16));
 void set_entity_position(Entity *entity, TimeData time_data);
-
-
-
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 
 

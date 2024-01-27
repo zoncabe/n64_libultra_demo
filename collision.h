@@ -5,11 +5,33 @@
 here are all the structures and functions prototypes that involve the collision detection */
 
 
-// the following code, at this point is jaltekruse's
-// i plan to reshape it so i can understand it
+// structures
+typedef struct {
+    float equation[4];
+    float origin[3];
+    float normal[3];
+} Plane;
 
 
-void set_pt(float* dest, float* src) 
+// function prototypes
+
+void set_point(float* dest, float* src);
+void set_vector(float *vector, float *a, float *b);
+void set_plane(Plane* plane, float origin[3], float normal[3]);
+
+float distance_2d(float* a, float* b);
+float distance(float* a, float* b);
+float distance_squared(float *a, float *b);
+float distance_point_and_line(float *a, float *b, float *c);
+
+void init_plane(Plane* plane, float* origin, float* normal);
+
+void init_plane_from_triangle(Plane* plane, float a[3], float b[3], float c[3]);
+
+
+/* set_point
+sets values from a source point to a destinatary*/
+void set_point(float* dest, float* src) 
 {
     dest[0] = src[0];
     dest[1] = src[1];
@@ -17,88 +39,142 @@ void set_pt(float* dest, float* src)
 }
 
 
-float max(float a, float b) 
+/* set_vector
+sets a vector given 2 points*/
+void set_vector(float *vector, float *a, float *b) 
 {
-    if (a > b) return a;
-    else return b;
+    vector[0] = b[0] - a[0];
+    vector[1] = b[1] - a[1];
+    vector[1] = b[2] - a[2];
 }
 
 
-float min(float a, float b) 
+/* set_plane_from_vector
+sets a plane given an origin point and a vector*/
+void set_plane_from_vector(Plane* plane, float origin[3], float normal[3])
 {
-    if (a < b) return a;
-    else return b;
+    set_point(plane->normal, normal);
+    set_point(plane->origin, origin);
+    set_point(plane->equation, normal);
+    plane->equation[3] = -dot(normal, origin);
 }
 
 
-float dot(float *u, float *v) 
+void set_plane_from_triangle(Plane *plane, float *a, float *b, float *c)
 {
-    return u[0] * v[0] + u[1] * v[1]; 
+    float *vec1;
+    float *vec2;
+
+    set_vector(vec1, a, b);
+    set_vector(vec2, a, c);
+
+    plane->normal[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
+    plane->normal[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
+    plane->normal[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
+
+    // Normalize the normal float
+
+    float length = qi_sqrt(dot(plane->normal, plane->normal));
+
+    plane->normal[0] /= length;
+    plane->normal[1] /= length;
+    plane->normal[2] /= length;
+
+    set_point(plane->origin, a);
+
+    set_point(plane->equation, plane->normal);
+    plane->equation[3] = -dot(plane->normal, plane->origin);
+}
+/*
+*/
+
+
+float distance_2d(float* a, float* b) 
+{
+    return 1 / qi_sqrt((a[0] - b[0]) * (a[0] - b[0])+ (a[1] - b[1]) * (a[1] - b[1]) );
 }
 
 
-void vector(float *dest, float *p1, float *p2) 
+float distance(float* a, float* b) 
 {
-    dest[0] = p2[0] - p1[0];
-    dest[1] = p2[1] - p1[1];
+    return 1 / qi_sqrt((a[0] - b[0]) * (a[0] - b[0])+ (a[1] - b[1]) * (a[1] - b[1])+ (a[2] - b[2]) * (a[2] - b[2]));
 }
 
 
-float distance_2d(float* pos1, float* pos2) 
+float distance_squared(float *a, float *b) 
 {
-    return 1 / Q_rsqrt( 
-          (pos1[0] - pos2[0]) * (pos1[0] - pos2[0])
-        + (pos1[1] - pos2[1]) * (pos1[1] - pos2[1])
-    );
+    return (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]);
 }
 
 
-float distance(float* pos1, float* pos2) 
+// Return minimum distance between line segment ab and point c
+
+float distance_point_and_line(float *a, float *b, float *c) 
 {
-    return 1 / Q_rsqrt( 
-          (pos1[0] - pos2[0]) * (pos1[0] - pos2[0])
-        + (pos1[1] - pos2[1]) * (pos1[1] - pos2[1])
-        + (pos1[2] - pos2[2]) * (pos1[2] - pos2[2])
-    );
+ float l2 = distance_squared(a, b);
+
+    float c_a[3];
+    float b_a[3];
+    float projection[3];
+    
+    if (l2 == 0.0) return distance_2d(c, a);
+    
+    c_a[0] = c[0] - a[0];
+    c_a[1] = c[1] - a[1];
+    b_a[0] = b[0] - a[0];
+    b_a[1] = b[1] - a[1];
+
+ float t = max(0, min(1, dot(c_a, b_a) / l2));
+
+    projection[0] = a[0] + t * (b[0] - a[0]);
+    projection[1] = a[1] + t * (b[1] - a[1]);
+    
+    return distance_2d(c, projection);
 }
 
 
-// length of a line segment in x and y directions
-// this is only 2D for now, but takes 3d pts
-float length_squared(float *pos1, float *pos2) 
+float distance_to_plane (Plane *plane, float* point) 
 {
-    return
-          (pos1[0] - pos2[0]) * (pos1[0] - pos2[0])
-        + (pos1[1] - pos2[1]) * (pos1[1] - pos2[1]);
+    return (point[0] * plane->normal[0] + point[1] * plane->normal[1] + point[2] * plane->normal[2]) + plane->equation[3];
 }
 
+
+int is_plane_front_facing_to (Plane *plane, float *direction)
+{
+    return (0 >= dot(plane->normal, direction));
+}
+
+
+int collision_point_and_circle(float point_position[3], float circle_center[3], float radius) 
+{
+
+    return radius >= distance(point_position, circle_center);
+}
 
 
 // https://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not/37865332#37865332
 // currently only looks at x and y, despite passing in 3d points
 
-int pt_in_rect(float* pos1, Entity *entity, int width, int depth) 
+int collision_point_and_rectangle(float point_position[3], float rectangle_position[3], float width, float depth) 
 {
-    float A[3]; float B[3]; float C[3]; float D[3];
+    float A[3], B[3], C[3], D[3], AB[3], AM[3], BC[3], BM[3];
 
-    float AB[3];float AM[3];float BC[3];float BM[3];
+    A[0] = rectangle_position[0] + width / 2;
+    A[1] = rectangle_position[1] + depth / 2;
+    
+    B[0] = rectangle_position[0] - width / 2;
+    B[1] = rectangle_position[1] + depth / 2;
+    
+    C[0] = rectangle_position[0] - width / 2;
+    C[1] = rectangle_position[1] - depth / 2;
+    
+    D[0] = rectangle_position[0] + width / 2;
+    D[1] = rectangle_position[1] - depth / 2;
 
-    A[0] = entity->pos[0] + width / 2;
-    A[1] = entity->pos[1] + depth / 2;
-    
-    B[0] = entity->pos[0] - width / 2;
-    B[1] = entity->pos[1] + depth / 2;
-    
-    C[0] = entity->pos[0] - width / 2;
-    C[1] = entity->pos[1] - depth / 2;
-    
-    D[0] = entity->pos[0] + width / 2;
-    D[1] = entity->pos[1] - depth / 2;
-
-    vector(AB, A, B);
-    vector(AM, A, pos1);
-    vector(BC, B, C);
-    vector(BM, B, pos1);
+    set_vector(AB, A, B);
+    set_vector(AM, A, point_position);
+    set_vector(BC, B, C);
+    set_vector(BM, B, point_position);
 
     float dotABAM = dot(AB, AM);
     float dotABAB = dot(AB, AB);
@@ -106,132 +182,38 @@ int pt_in_rect(float* pos1, Entity *entity, int width, int depth)
     float dotBCBC = dot(BC, BC);
 
     return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
-
-    // javascript for reference from the link above
-    /*
-        function pointInRectangle(m, r) {
-            var AB = vector(r.A, r.B);
-            var AM = vector(r.A, m);
-            var BC = vector(r.B, r.C);
-            var BM = vector(r.B, m);
-            var dotABAM = dot(AB, AM);
-            var dotABAB = dot(AB, AB);
-            var dotBCBM = dot(BC, BM);
-            var dotBCBC = dot(BC, BC);
-            return 0 <= dotABAM && dotABAM <= dotABAB && 0 <= dotBCBM && dotBCBM <= dotBCBC;
-        }
-
-        function vector(p1, p2) {
-            return {
-                    x: (p2.x - p1.x),
-                    y: (p2.y - p1.y)
-            };
-        }
-
-        function dot(u, v) {
-            return u.x * v.x + u.y * v.y; 
-        }
-
-        var r = {
-            A: {x: 50, y: 0},
-            B: {x: 0, y: 20},
-            C: {x: 10, y: 50},
-            D: {x: 60, y: 30}
-        };
-
-        var m = {x: 40, y: 20};
-
-        pointInRectangle(m, r); // returns true.
-    */
-}
-
-
-// show the bounding rectangle for an object (that is not rotated)
-void debug_entity_collision_rect(StaticEntity* static_entity) 
-{
-    scenery[0].entity.pos[0] =  static_entity->entity.pos[0] + get_static_entity_width(static_entity) / 2;
-    scenery[0].entity.pos[1] =  static_entity->entity.pos[1] + get_static_entity_depth(static_entity) / 2;
-    scenery[0].entity.pos[2] =  static_entity->entity.pos[2];
-
-    scenery[1].entity.pos[0] =  static_entity->entity.pos[0] - get_static_entity_width(static_entity) / 2;
-    scenery[1].entity.pos[1] =  static_entity->entity.pos[1] + get_static_entity_depth(static_entity) / 2;
-    scenery[1].entity.pos[2] =  static_entity->entity.pos[2];
-
-    scenery[2].entity.pos[0] =  static_entity->entity.pos[0] - get_static_entity_width(static_entity) / 2;
-    scenery[2].entity.pos[1] =  static_entity->entity.pos[1] - get_static_entity_depth(static_entity) / 2;
-    scenery[2].entity.pos[2] =  static_entity->entity.pos[2];
-
-    scenery[3].entity.pos[0] =  static_entity->entity.pos[0] + get_static_entity_width(static_entity) / 2;
-    scenery[3].entity.pos[1] =  static_entity->entity.pos[1] - get_static_entity_depth(static_entity) / 2;
-    scenery[3].entity.pos[2] =  static_entity->entity.pos[2];
 }
 
 
 
-// Return minimum distance between line segment vw and point p
-
-float minimum_distance(float *v, float *w, float *p) 
+/*
+void detect_collisions(Entity *entity, Scenery object, TimeData timedata) 
 {
-    const float l2 = length_squared(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
-    if (l2 == 0.0) return distance_2d(p, v);   // v == w case
-    // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line. 
-    // It falls where t = [(p-v) . (w-v)] / |w-v|^2
-    // We clamp t from [0,1] to handle points outside the segment vw.
-    float p_v[3] = {};
-    p_v[0] = p[0] - v[0];
-    p_v[1] = p[1] - v[1];
-    float w_v[3] = {};
-    w_v[0] = w[0] - v[0];
-    w_v[1] = w[1] - v[1];
-    const float t = max(0, min(1, dot(p_v, w_v) / l2));
-    float projection[3];
-    projection[0] = v[0] + t * (w[0] - v[0]);
-    projection[1] = v[1] + t * (w[1] - v[1]);
-    //const vec2 projection = v + t * (w - v);  // Projection falls on the segment
-    return distance_2d(p, projection);
-}
-
-float min_dist_to_wall_old;
-float min_dist_to_wall_new;
-
-void detect_collisions() 
-{
-    StaticEntity *shack = &scenery[SCENERY_COUNT - 1];
-
-    if ( pt_in_rect(nick.entity.pos, &scenery[SCENERY_COUNT - 1].entity, 500, 500)) {
-        // just do the oposite of what we did to move this frame to get out of the wall
-        Entity *entity = &nick.entity;
-        // calculate if the next frame will move us out of the box
-        float new_pos[3] = {};
-        float frame_distance = time_data.frame_duration * entity->speed;
-        new_pos[0] = entity->pos[0] + frame_distance * sin(rad(entity->yaw));
-        new_pos[1] = entity->pos[1] - frame_distance * cos(rad(entity->yaw));
-
+    if ( collision_point_and_rectangle(entity->position, object.position, 100, 100)) {
 
         float A[3]; float B[3]; float C[3]; float D[3];
 
-        int width = get_static_entity_width(shack);
-        int depth = get_static_entity_depth(shack);
+        int width = 100;
+        int depth = 100;
 
-        A[0] = entity->pos[0] + width / 2;
-        A[1] = entity->pos[1] + depth / 2;
+        A[0] = entity->position[0] + width / 2;
+        A[1] = entity->position[1] + depth / 2;
         
-        B[0] = entity->pos[0] - width / 2;
-        B[1] = entity->pos[1] + depth / 2;
+        B[0] = entity->position[0] - width / 2;
+        B[1] = entity->position[1] + depth / 2;
         
-        C[0] = entity->pos[0] - width / 2;
-        C[1] = entity->pos[1] - depth / 2;
+        C[0] = entity->position[0] - width / 2;
+        C[1] = entity->position[1] - depth / 2;
         
-        D[0] = entity->pos[0] + width / 2;
-        D[1] = entity->pos[1] - depth / 2;
+        D[0] = entity->position[0] + width / 2;
+        D[1] = entity->position[1] - depth / 2;
 
         min_dist_to_wall_old =
 
-        min(minimum_distance(A, D, nick.entity.pos),
-            min(minimum_distance(C, D, nick.entity.pos),
-                min(minimum_distance(A, B, nick.entity.pos), 
-                    minimum_distance(B, C, nick.entity.pos)
+        min(minimum_distance(A, D, entity->position),
+            min(minimum_distance(C, D, entity->position),
+                min(minimum_distance(A, B, entity->position), 
+                    minimum_distance(B, C, entity->position)
                 )
             )
         );
@@ -246,25 +228,17 @@ void detect_collisions()
             )
         );
 
-        if (pt_in_rect(new_pos, &scenery[SCENERY_COUNT - 1].entity, get_static_entity_width(shack), get_static_entity_depth(shack))
-        ) {
+        if (collision_point_and_rectangle(new_pos, object.position, 500, 500))
+        {
             if (min_dist_to_wall_new != min_dist_to_wall_old) {
-                nick.entity.speed = 0;
+                
+                entity.speed[0] = 0;
+                entity.speed[1] = 0;
             }
         }
     }
-    
-    if ( distance(nick.entity.pos, willy.entity.pos) < 150) {
-        nick.entity.speed = -800;
-        set_entity_state(&nick, FALLBACK);
-    }
-
-    if ( distance(candy.entity.pos, willy.entity.pos) < 150) {
-        //willy.entity.vertical_speed = 4000;
-        willy.entity.speed = 800;
-        set_entity_state(&willy, FALLBACK);
-    }
 }
+*/
 
 
 

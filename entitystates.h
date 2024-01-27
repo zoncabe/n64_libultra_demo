@@ -135,7 +135,7 @@ void set_running_state(Entity *entity)
     if (entity->state == RUNNING) return;
     
     entity->state = RUNNING;
-    sausage64_set_anim(&entity->model, ANIMATION_nick_run_right);
+    sausage64_set_anim(&entity->model, ANIMATION_nick_jog_right);
     entity->previous_state = RUNNING;
 }
 
@@ -200,25 +200,25 @@ void set_jump_state(Entity *entity)
 {
     calculate_acceleration (entity, entity->directional_speed, entity->settings.aerial_control_rate);
     
-    if (entity->hold == 1 && entity->release == 0 && entity->hold_time < 0.33) 
+    if (entity->input.hold == 1 && entity->input.released == 0 && entity->input.time_held < entity->settings.jump_timer_max) 
         calculate_jump_acceleration (entity, entity->settings.jump_target_speed, entity->settings.jump_acceleration_rate);
     
     else entity->acceleration[2] = -GRAVITY;
 
-    entity->hold = 0;
+    entity->input.hold = 0;
     entity->grounded = 0;
 
     if (entity->position[2] < 0) {
 
         entity->grounded = 1;
-        entity->hold_time = 0;
-        entity->release = 0;
+        entity->input.time_held = 0;
+        entity->input.released = 0;
 
         entity->acceleration[2] = 0;
         entity->speed[2] = 0;
         entity->position[2] = 0;
 
-        set_entity_state (entity, STAND_IDLE);
+        set_entity_state (entity, entity->previous_state);
         return;
     }
 
@@ -226,7 +226,6 @@ void set_jump_state(Entity *entity)
     
     entity->state = JUMP;
     sausage64_set_anim (&entity->model, ANIMATION_nick_jump_left);
-    //entity->previous_state = JUMP;
 }
 
 
