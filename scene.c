@@ -160,6 +160,11 @@ Scenery cube = {
 };
 
 
+float pa[3] ={200, 200, 0};
+float pb[3] ={-200, 50, 0};
+float pc[3] ={50, -200, 0};
+
+
 void rotate_cube(){
 
     if ( cube.rotational_speed[0] > 270){
@@ -173,6 +178,7 @@ void rotate_cube(){
     cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
     cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
 }
+
 /*
 int swap_cube_index = 0;
 
@@ -391,15 +397,15 @@ void print_debug_data()
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
     if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
 
-    if (collision_point_and_circle(player.position, cube.position, 200)) {
+    if (collision_point_and_triangle(player.position, pa, pb, pc)) {
         nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
     }
+    /*
 
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "time_held  %d", (int)(player.input.time_held * 1000));
     
-    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "z acceleration  %d", (int)player.acceleration[2]);
     
