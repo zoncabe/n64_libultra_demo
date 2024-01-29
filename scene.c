@@ -138,10 +138,10 @@ Scenery axis_cube[AXIS_COUNT] = {
     {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100,  100,   0}, yaw: 180, pitch: 0, roll:   0,},
     {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100,  100,   0}, yaw: 270, pitch: 0, roll:   0,},
     
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100, 200}, yaw: 270, pitch: 0, roll: 180,},
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100, 200}, yaw:   0, pitch: 0, roll: 180,},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100, 200}, yaw:  90, pitch: 0, roll: 180,},
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100, 200}, yaw: 180, pitch: 0, roll: 180,},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100, 50}, yaw: 270, pitch: 0, roll: 180,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100, 50}, yaw:   0, pitch: 0, roll: 180,},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100, 50}, yaw:  90, pitch: 0, roll: 180,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100, 50}, yaw: 180, pitch: 0, roll: 180,},
     
     
 };
@@ -487,6 +487,7 @@ void update_scene()
     set_viewport_position(&viewport, player, timedata);
 
     set_point(player_bounding_box.center, player.position);
+    player_bounding_box.center[2] += player_bounding_box.radius;
 
     rotate_cube();
 }
