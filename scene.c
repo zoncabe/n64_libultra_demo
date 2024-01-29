@@ -160,9 +160,16 @@ Scenery cube = {
 };
 
 
-float pa[3] ={200, 200, 0};
-float pb[3] ={-200, 50, 0};
-float pc[3] ={50, -200, 0};
+AABB cube_bounding_box = {
+
+    min: {-100, -100, 0},
+    max: {100, 100, 50},
+};
+
+Sphere player_bounding_box = {
+
+    radius: 20,
+};
 
 
 void rotate_cube(){
@@ -397,7 +404,7 @@ void print_debug_data()
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
     if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
 
-    if (collision_point_and_triangle(player.position, pa, pb, pc)) {
+    if (collision_sphere_aabb(player_bounding_box, cube_bounding_box)) {
         nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
     }
@@ -472,7 +479,6 @@ void update_scene()
 
     set_entity_position(&player, timedata);
 
-
     set_entity_state(&player, player.state);  
 
     //move_viewport_stick(&viewport, &contdata[1]);
@@ -480,12 +486,8 @@ void update_scene()
 
     set_viewport_position(&viewport, player, timedata);
 
-    /*
-    if (contdata[0].button & R_TRIG) swap_cube_index = 1;
-    
-    if (swap_cube_index == 1) swap_cube();
-    else 
-    */
+    set_point(player_bounding_box.center, player.position);
+
     rotate_cube();
 }
 

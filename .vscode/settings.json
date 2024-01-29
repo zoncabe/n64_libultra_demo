@@ -4,6 +4,8 @@
         "entity.h": "c",
         "cmath": "cpp",
         "helper.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "iterator": "cpp",
+        "numbers": "cpp"
     }
 }

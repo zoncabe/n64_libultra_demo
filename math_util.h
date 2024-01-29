@@ -24,7 +24,7 @@ float calculate_diagonal(float a, float b);
 return higher value*/
 float max(float a, float b) 
 {
-    if (a > b) return a; else return b;
+    return (a > b) ? a : b;
 }
 
 
@@ -39,17 +39,17 @@ float min(float a, float b)
 /* rad
 angle to radians*/
 
-float rad(float angle){
-	osSyncPrintf("1 rad\n");
+float rad(float angle)
+{
 	float radian = M_PI / 180 * angle;
-	osSyncPrintf("2 rad\n");
 	return radian;
 }
 
 /* deg
 radians to angle*/
 
-float deg(float rad){
+float deg(float rad)
+{
 	float angle = 180 / M_PI * rad;
 	return angle;
 }
@@ -82,6 +82,7 @@ void add_scaled_vector(float* result, const float* vector, const float* scale_ve
     result[2] = vector[2] + scalar * scale_vector[2];
 }
 
+
 void divide_vector_by_float(float *vector, float divisor)
 {
     if (divisor != 0.0f) { // Ensure the divisor is not zero to avoid division by zero
@@ -99,7 +100,6 @@ void divide_vector_by_float(float *vector, float divisor)
 
 /*qi_sqrt
 quick inverse square root*/
-
 float qi_sqrt(float number){
 
 	long i;
