@@ -7,6 +7,8 @@ i added some code to try to make it look like a 3rd person shooter
 
 hopefully i will add more gameplay styles when i have covered all the basic stuff
 
+##
+
 ### compilation
 
 im on lubuntu using [Crashoveride Modern SDK](https://crashoveride95.github.io/modernsdk/), if you are interested i can help you out setting up a docker
