@@ -58,8 +58,6 @@ typedef struct {
 
 } Scenery;
 
-//} interactive_object;
-
 
 // function prototypes
 
