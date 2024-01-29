@@ -15,8 +15,6 @@ void set_third_person_shooter_aiming_viewport(Viewport *viewport);
 void set_third_person_shooter_looking_viewport(Viewport *viewport);
 
 
-
-
 void set_viewport_state(Viewport *viewport, ViewportState new_state) 
 {
     switch(new_state) {
@@ -35,6 +33,7 @@ void set_viewport_state(Viewport *viewport, ViewportState new_state)
         }
     }
 }
+
 
 void set_third_person_shooter_viewport(Viewport *viewport)
 {
