@@ -3,7 +3,7 @@
 
 this is the bare bones [Buu 342's Libultra Sausage64 demo rom](https://github.com/buu342/N64-Sausage64) stripped of all the model showcase functions
 
-i added some code to try to make it look like a third person shooter
+i added some code to try to make it look like a 3rd person shooter
 
 hopefully i will add more gameplay styles when i have covered all the basic stuff
 
