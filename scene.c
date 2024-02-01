@@ -27,6 +27,7 @@ handles the demo scene */
 #include "viewportstates.h"
 #include "controls.h"
 #include "collision.h"
+#include "collision_response.h"
 
 
 // macros
@@ -53,10 +54,10 @@ TimeData timedata;
 
 Viewport viewport = {
 
-    distance_from_entity: 250,
+    distance_from_entity: 280,
     target_distance: 600,
     angle_around_entity: 30,
-    offset_angle: 20,
+    offset_angle: 15,
     pitch: 10,
     height: 90,
     
@@ -65,19 +66,19 @@ Viewport viewport = {
         rotational_acceleration_rate: 8,
         rotational_max_speed: {120, 100},
 
-        zoom_acceleration_rate: 30,
+        zoom_acceleration_rate: 40,
         zoom_deceleration_rate: 10,
         zoom_max_speed: 600,
 
-        target_zoom: 230,
+        target_zoom: 250,
         target_zoom_aim: 130,
 
 	    offset_acceleration_rate: 6,
-        offset_deceleration_rate: 30,
+        offset_deceleration_rate: 40,
 	    offset_max_speed: 40,
 
-        target_offset: 23,
-        target_offset_aim: 30,
+        target_offset: 18,
+        target_offset_aim: 28,
 
 	    max_pitch: 70,
     },
@@ -127,32 +128,32 @@ Entity player = {
     },
 };
 
+
 Mtx playerMtx[MESHCOUNT_nick];
+
 
 #define AXIS_COUNT 8
 
 Scenery axis_cube[AXIS_COUNT] = {
 
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100, -100,   0}, yaw:   0, pitch: 0, roll:   0,},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100, -100,   0}, yaw:  90, pitch: 0, roll:   0,},
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100,  100,   0}, yaw: 180, pitch: 0, roll:   0,},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100,  100,   0}, yaw: 270, pitch: 0, roll:   0,},
-    
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100, 50}, yaw: 270, pitch: 0, roll: 180,},
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100, 50}, yaw:   0, pitch: 0, roll: 180,},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100, 50}, yaw:  90, pitch: 0, roll: 180,},
-    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100, 50}, yaw: 180, pitch: 0, roll: 180,},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100, -100,   0}, rotation: {0,   0,   0}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100, -100,   0}, rotation: {0,   0,  90}},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100,  100,   0}, rotation: {0,   0, 180}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100,  100,   0}, rotation: {0,   0, 270}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100,  50}, rotation: {0, 180,  90}},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100,  50}, rotation: {0, 180,   0}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100,  50}, rotation: {0, 180, 270}},
+    {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100,  50}, rotation: {0, 180, 180}},
     
     
 };
 
+
 Scenery cube = {
 
-    yaw: 10,
-    pitch: 72,
-    roll: 36,
-    scale: {1 ,1 ,1},
-    position: {0, 0, 100},
+    scale: { 3, 3, 0.5},
+    position: {300, 300, 25},
+    rotation: {0, 0, 30},
 
     rotational_speed: {270, 50, 190,},
 
@@ -160,55 +161,50 @@ Scenery cube = {
 };
 
 
-AABB cube_bounding_box = {
+AABB axis_cube_bounding_box = {
 
-    min: {-100, -100, 0},
-    max: {100, 100, 50},
+    min: {-100, -100, 0,},
+    max: {100, 100, 50,},
 };
 
-Sphere player_bounding_box = {
+
+OBB cube_object_box = {
+
+    size: {300, 300, 50},
+    center: {300, 300, 25},
+    rotation: {0, 0, 30,},    
+};
+
+Sphere sphere = {
+
+    center: {0, 0, 50,},
+    radius: 50,
+
+};
+
+
+Capsule player_bounding_box = {
 
     radius: 20,
 };
 
 
-void rotate_cube(){
-
-    if ( cube.rotational_speed[0] > 270){
-
-        cube.rotational_speed[0] -= 50;
-        cube.rotational_speed[1] -= 50;
-        cube.rotational_speed[2] -= 50;
-    }
-
-    cube.yaw += cube.rotational_speed[0] * timedata.frame_duration;
-    cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
-    cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
+void set_capsule(Capsule* capsule, Entity entity, float height)
+{
+    capsule->start_point[0]  = entity.position[0]; 
+    capsule->start_point[1]  = entity.position[1]; 
+    capsule->start_point[2]  = entity.position[2] + capsule->radius;
+    capsule->end_point[0] = entity.position[0];
+    capsule->end_point[1] = entity.position[1];
+    capsule->end_point[2] = entity.position[2] + capsule->radius + height;
 }
 
-/*
-int swap_cube_index = 0;
-
-void swap_cube(){
-
-    cube.scale_speed = 0;
-
-    if ( cube.rotational_speed[0] < 1270){
-
-        cube.rotational_speed[0] += 50;
-        cube.rotational_speed[1] += 50;
-        cube.rotational_speed[2] += 50;
-    }
-
-    cube.yaw += cube.rotational_speed[0] * timedata.frame_duration;
-    cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
-    cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
-
-    swap_cube_index = 0;
-
-    cube.model = gfx_n64_logo;
+void set_sphere(Sphere* sphere, Entity entity)
+{
+    sphere->center[0]  = entity.position[0]; 
+    sphere->center[1]  = entity.position[1]; 
+    sphere->center[2]  = entity.position[2] + sphere->radius;
 }
-*/
 
 
 /* entity_animcallback
@@ -301,18 +297,15 @@ handles the system functions that enters an entity's position and rotation value
 void set_entity (Entity *entity)
 {
     guTranslate(&entity->position_mtx, entity->position[0], entity->position[1], entity->position[2]);
-    guRotate(&entity->rotation_mtx[0], entity->pitch, 1, 0, 0);
-    guRotate(&entity->rotation_mtx[1], entity->yaw, 0, 0, 1);
+    guRotate(&entity->rotation_mtx[2], entity->yaw, 0, 0, 1);
     guScale(&entity->scale_mtx, entity->scale, entity->scale, entity->scale);
 
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[0]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[1]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[2]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
 
     sausage64_drawmodel(&glistp, &entity->model);
 
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
@@ -325,9 +318,9 @@ handles the system functions that enters a scenery object's position and rotatio
 void set_scenery (Scenery *scenery)
 {
     guTranslate(&scenery->position_mtx, scenery->position[0], scenery->position[1], scenery->position[2]);
-    guRotate(&scenery->rotation_mtx[0], scenery->pitch, 1, 0, 0);
-    guRotate(&scenery->rotation_mtx[1], scenery->yaw, 0, 0, 1);
-    guRotate(&scenery->rotation_mtx[2], scenery->roll, 0, 1, 0);
+    guRotate(&scenery->rotation_mtx[0], scenery->rotation[0], 1, 0, 0);
+    guRotate(&scenery->rotation_mtx[1], scenery->rotation[1], 0, 1, 0);
+    guRotate(&scenery->rotation_mtx[2], scenery->rotation[2], 0, 0, 1);
     guScale(&scenery->scale_mtx, scenery->scale[0], scenery->scale[1], scenery->scale[2]);
 
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
@@ -396,41 +389,33 @@ void print_debug_data()
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
+ 
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "height  %d", (int)player.position[2]);
 
+    if(collision_capsule_aabb(&player, player_bounding_box, axis_cube_bounding_box)) {
+        get_collision_normal_aabb(&player, axis_cube_bounding_box);
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "CAPSULE AABB");
+    }
+
+    if(collision_capsule_obb(&player, player_bounding_box, cube_object_box)) {
+
+        get_collision_normal_obb(&player, cube_object_box);
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "CAPSULE OBB");
+    }
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "collision normal: %d, %d, %d", (int)(player.collision.normal[0] * 1000 ), (int)(player.collision.normal[1] * 1000 ), (int)(player.collision.normal[2] * 1000 ));
+       
+    /*
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
     if(player.state == STAND_IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "STAND IDLE");
     if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
     if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
     if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
     if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
-
-    if (collision_sphere_aabb(player_bounding_box, cube_bounding_box)) {
-        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-        nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
-    }
-    /*
-
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "time_held  %d", (int)(player.input.time_held * 1000));
-    
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 6);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "z acceleration  %d", (int)player.acceleration[2]);
-    
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 7);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "grounded  %d", (int)player.grounded);
-    
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 8);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "hold time  %d", (int)(100 * player.hold_time));
-
-
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 9);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "COLLISION");
-    
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 10);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target y  %d", (int)viewport.target[1]);
-    
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 11);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "target z  %d", (int)viewport.target[2]);
     */
 }
 
@@ -486,10 +471,11 @@ void update_scene()
 
     set_viewport_position(&viewport, player, timedata);
 
-    set_point(player_bounding_box.center, player.position);
-    player_bounding_box.center[2] += player_bounding_box.radius;
+    set_capsule(&player_bounding_box, player, 20);
+    //set_sphere(&player_bounding_box, player);
 
-    rotate_cube();
+    set_collissions(&player, player_bounding_box, axis_cube_bounding_box, cube_object_box);
+    //rotate_cube();
 }
 
 

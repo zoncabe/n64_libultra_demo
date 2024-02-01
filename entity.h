@@ -64,6 +64,13 @@ typedef struct {
 
 }Entityinput;
 
+typedef struct {
+
+	float point[3];
+	float normal[3];
+
+}EntityCollision; 
+
 
 typedef struct {
 
@@ -78,8 +85,9 @@ typedef struct {
 	int grounded;
 	
 	float scale;
+	float previous_position[3];
 	float position[3];
-	float pitch;
+	
 	float target_yaw;
 	float yaw;
     
@@ -92,6 +100,7 @@ typedef struct {
 	s64ModelHelper model;
 	EntitySettings settings;
 	Entityinput input;
+	EntityCollision collision;
 
 	Mtx model_mtx[];
 
@@ -121,7 +130,12 @@ void init_entity(Entity *entity, int idle, Mtx *entityMtx, void (*animcallback)(
 calculates the entity position given the speed and the available frame duration*/
 
 void set_entity_position(Entity *entity, TimeData time_data)
-{
+{	
+	
+	entity->previous_position[0] = entity->position[0];
+	entity->previous_position[1] = entity->position[1];
+	entity->previous_position[2] = entity->position[2];
+	
     entity->speed[0] += (entity->acceleration[0] * time_data.frame_duration);
     entity->speed[1] += (entity->acceleration[1] * time_data.frame_duration);
     entity->speed[2] += (entity->acceleration[2] * time_data.frame_duration);

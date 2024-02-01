@@ -48,9 +48,7 @@ typedef struct {
 	float acceleration[3];
 	float speed[3];
 
-	float pitch;
-	float yaw;
-    float roll;
+	float rotation[3];
 	float rotational_speed[3];
 	float rotational_acceleration[3];
 

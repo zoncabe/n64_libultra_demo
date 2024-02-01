@@ -9,7 +9,8 @@ float min(float a, float b);
 float rad(float angle);
 float deg(float rad);
 
-float dot(float *a, float *b);
+float dot_product(float *a, float *b);
+void cross_product(float* result, const float* a, const float* b);
 
 void subtract_vectors(float* result, const float* vector1, const float* vector2);
 void add_scaled_vector(float* result, const float* vector, const float* scale_vector, float scalar);
@@ -35,14 +36,21 @@ float min(float a, float b)
     if (a < b) return a; else return b;
 }
 
+/* clamp
+clamp x to the range [a, b] */
+float clamp(float x, float a, float b) {
+    if (x < a) return a;
+    if (x > b) return b;
+    return x;
+}
+
   
 /* rad
 angle to radians*/
 
 float rad(float angle)
 {
-	float radian = M_PI / 180 * angle;
-	return radian;
+	return M_PI / 180 * angle;
 }
 
 /* deg
@@ -50,16 +58,24 @@ radians to angle*/
 
 float deg(float rad)
 {
-	float angle = 180 / M_PI * rad;
-	return angle;
+	return 180 / M_PI * rad;
 }
 
 
 /*dot
 returns dot product*/
-float dot_product(float *a, float *b) 
+float dot_product(float* a, float* b) 
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; 
+}
+
+
+/* cross_product
+calculates the cross product of two 3D vectors */
+void cross_product(float* result, const float* a, const float* b) {
+    result[0] = a[1] * b[2] - a[2] * b[1];
+    result[1] = a[2] * b[0] - a[0] * b[2];
+    result[2] = a[0] * b[1] - a[1] * b[0];
 }
 
 
@@ -83,7 +99,7 @@ void add_scaled_vector(float* result, const float* vector, const float* scale_ve
 }
 
 
-void divide_vector_by_float(float *vector, float divisor)
+void divide_vector_by_float(float* vector, float divisor)
 {
     if (divisor != 0.0f) { // Ensure the divisor is not zero to avoid division by zero
         vector[0] /= divisor;

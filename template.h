@@ -40,6 +40,49 @@ void entity_collide_and_slide(Entity *entity, CollisionPackage collision_package
 
 
 
+
+
+void rotate_cube(){
+
+    if ( cube.rotational_speed[0] > 270){
+
+        cube.rotational_speed[0] -= 50;
+        cube.rotational_speed[1] -= 50;
+        cube.rotational_speed[2] -= 50;
+    }
+
+    cube.rotation[0] += cube.rotational_speed[0] * timedata.frame_duration;
+    cube.rotation[1] -= cube.rotational_speed[1] * timedata.frame_duration;
+    cube.rotation[2] += cube.rotational_speed[2] * timedata.frame_duration;
+}
+
+/*
+int swap_cube_index = 0;
+
+void swap_cube(){
+
+    cube.scale_speed = 0;
+
+    if ( cube.rotational_speed[0] < 1270){
+
+        cube.rotational_speed[0] += 50;
+        cube.rotational_speed[1] += 50;
+        cube.rotational_speed[2] += 50;
+    }
+
+    cube.yaw += cube.rotational_speed[0] * timedata.frame_duration;
+    cube.pitch -= cube.rotational_speed[1] * timedata.frame_duration;
+    cube.roll += cube.rotational_speed[2] * timedata.frame_duration;
+
+    swap_cube_index = 0;
+
+    cube.model = gfx_n64_logo;
+}
+*/
+
+
+
+
     // Set this to match application scale..
     const float unitsPerMeter = 100.0f;
     
@@ -878,35 +921,6 @@ void detect_collisions(Entity *entity, Scenery object, TimeData timedata)
 
 
 
-
-
-// Return minimum distance between line segment ab and point c
-
-float distance_point_and_line(float *a, float *b, float *c) 
-{
- float l2 = distance_squared(a, b);
-
-    float c_a[3];
-    float b_a[3];
-    float projection[3];
-    
-    if (l2 == 0.0) return distance(c, a);
-    
-    c_a[0] = c[0] - a[0];
-    c_a[1] = c[1] - a[1];
-    b_a[0] = b[0] - a[0];
-    b_a[1] = b[1] - a[1];
-
- float t = max(0, min(1, dot_product(c_a, b_a) / l2));
-
-    projection[0] = a[0] + t * (b[0] - a[0]);
-    projection[1] = a[1] + t * (b[1] - a[1]);
-    
-    return distance(c, projection);
-}
-
-
-
 /*
 returns the minimum distance between a line segment ab and point c */ 
 
@@ -922,6 +936,7 @@ float distance_point_and_line(float *a, float *b, float *c)
     
     c_a[0] = c[0] - a[0];
     c_a[1] = c[1] - a[1];
+    
     b_a[0] = b[0] - a[0];
     b_a[1] = b[1] - a[1];
 
@@ -931,6 +946,21 @@ float distance_point_and_line(float *a, float *b, float *c)
     projection[1] = a[1] + t * (b[1] - a[1]);
     
     return distance(c, projection);
+}
+
+/* squared_distance_point_to_segment
+calculates the squared distance from a point to a line segment */
+float squared_distance_point_to_segment(float point[3], float segment_start[3], float segment_end[3])
+{
+    float segment_vector[3] = {segment_end[0] - segment_start[0], segment_end[1] - segment_start[1], segment_end[2] - segment_start[2]};
+    float point_vector[3] = {point[0] - segment_start[0], point[1] - segment_start[1], point[2] - segment_start[2]};
+    float segment_length_squared = squared_distance(segment_start, segment_end);
+
+    float t = dot_product(point_vector, segment_vector) / segment_length_squared;
+    t = (t < 0.0f) ? 0.0f : ((t > 1.0f) ? 1.0f : t);  // Clamp t to the range [0, 1]
+
+    float closest[3] = {segment_start[0] + t * segment_vector[0], segment_start[1] + t * segment_vector[1], segment_start[2] + t * segment_vector[2]};
+    return squared_distance(point, closest);
 }
 
 
