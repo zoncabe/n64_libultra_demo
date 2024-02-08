@@ -6,8 +6,8 @@ here are all the structures and functions prototypes that involve the collision 
 
 void get_collision_normal_aabb(Entity* entity, AABB aabb);
 void get_collision_normal_obb(Entity* entity, OBB obb) ;
-void collision_response(Entity* entity);
-void set_collissions(Entity* entity, Capsule capsule, AABB aabb, OBB obb);
+void collide_and_slide(Entity* entity);
+void set_collission_response(Entity* entity, Capsule capsule, AABB aabb, OBB obb);
 
 
 /* get_collision_normal_aabb
@@ -127,19 +127,14 @@ void get_collision_normal_obb(Entity* entity, OBB obb)
 
 
 
-void collision_response(Entity* entity)
+void collide_and_slide(Entity* entity)
 {
-    // Paso 1: Calcular el vector de desplazamiento
     float displacement[3] = {
         entity->position[0] - entity->previous_position[0],
         entity->position[1] - entity->previous_position[1],
         entity->position[2] - entity->previous_position[2]
     };
 
-    // Supongamos que ya hemos detectado una colisión y tenemos la normal de la colisión almacenada en entity->collision.normal
-
-    // Paso 2: Calcular el vector de deslizamiento (slide vector)
-    // Esto se hace proyectando el vector de desplazamiento sobre el plano de colisión
     float dotProduct = displacement[0] * entity->collision.normal[0] +
                        displacement[1] * entity->collision.normal[1] +
                        displacement[2] * entity->collision.normal[2];
@@ -149,26 +144,25 @@ void collision_response(Entity* entity)
         displacement[1] - dotProduct * entity->collision.normal[1],
         displacement[2] - dotProduct * entity->collision.normal[2]
     };
-
-    // Paso 3: Aplicar el vector de deslizamiento a partir de la posición anterior de la entidad
+    
     entity->position[0] = entity->previous_position[0] + slideVector[0];
     entity->position[1] = entity->previous_position[1] + slideVector[1];
     entity->position[2] = entity->previous_position[2] + slideVector[2];
-
-    // Nota: Es posible que necesites realizar más verificaciones de colisión después de aplicar el vector de deslizamiento
-    // para manejar casos donde el movimiento resultante pueda causar nuevas colisiones.
+    
 }
 
 
-void set_collissions(Entity* entity, Capsule capsule, AABB aabb, OBB obb)
+void set_collission_response(Entity* entity, Capsule capsule, AABB aabb, OBB obb)
 {
     if(collision_capsule_aabb(entity, capsule, aabb)){
             get_collision_normal_aabb(entity, aabb);
-            collision_response(entity);
+            collide_and_slide(entity);
     }
     if(collision_capsule_obb(entity, capsule, obb)){
             get_collision_normal_obb(entity, obb);
-            collision_response(entity);
+            collide_and_slide(entity);
     }
 }
+
+
 #endif

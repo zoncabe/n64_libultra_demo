@@ -6,6 +6,7 @@ handles the demo scene */
 #include <nusys.h>
 #include <string.h> // Needed for CrashSDK compatibility
 #include <math.h>
+#include <float.h>
 
 #include "config.h"
 #include "helper.h"
@@ -26,7 +27,7 @@ handles the demo scene */
 #include "entitystates.h"
 #include "viewportstates.h"
 #include "controls.h"
-#include "collision.h"
+#include "collision_detection.h"
 #include "collision_response.h"
 
 
@@ -59,7 +60,7 @@ Viewport viewport = {
     angle_around_entity: 30,
     offset_angle: 15,
     pitch: 10,
-    height: 90,
+    height: 70,
     
     settings: {
 
@@ -73,7 +74,7 @@ Viewport viewport = {
         target_zoom: 250,
         target_zoom_aim: 130,
 
-	    offset_acceleration_rate: 6,
+	    offset_acceleration_rate: 12,
         offset_deceleration_rate: 40,
 	    offset_max_speed: 40,
 
@@ -385,13 +386,38 @@ sets debug information to be printed on screen */
 void print_debug_data()
 {
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "position: %d, %d, %d", (int)player.position[0], (int)player.position[1], (int)player.position[2]);
+
+    float hit_distance, hit_point[3];
+
+    if(collision_ray_aabb(viewport.position, viewport.target, axis_cube_bounding_box, &hit_distance, hit_point)) {
+
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "ray hit distance %d", (int)(hit_distance) );
+
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "ray hit point %d, %d, %d", (int)(hit_point[0]), (int)(hit_point[1]), (int)(hit_point[2]) );
+    }
+
+   
+    /*
+
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "time  %d", (int) get_time());
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
- 
+
+     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "collision normal: %d, %d, %d", (int)(player.collision.normal[0] * 1000 ), (int)(player.collision.normal[1] * 1000 ), (int)(player.collision.normal[2] * 1000 ));
+
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "height  %d", (int)player.position[2]);
+    if(player.state == STAND_IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "STAND IDLE");
+    if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
+    if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
+    if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
+    if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
+
 
     if(collision_capsule_aabb(&player, player_bounding_box, axis_cube_bounding_box)) {
         get_collision_normal_aabb(&player, axis_cube_bounding_box);
@@ -405,17 +431,6 @@ void print_debug_data()
         nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 5);
         nuDebConPrintf(NU_DEB_CON_WINDOW0, "CAPSULE OBB");
     }
-
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "collision normal: %d, %d, %d", (int)(player.collision.normal[0] * 1000 ), (int)(player.collision.normal[1] * 1000 ), (int)(player.collision.normal[2] * 1000 ));
-       
-    /*
-    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-    if(player.state == STAND_IDLE) nuDebConPrintf(NU_DEB_CON_WINDOW0, "STAND IDLE");
-    if(player.state == WALKING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "WALKING");
-    if(player.state == RUNNING) nuDebConPrintf(NU_DEB_CON_WINDOW0, "RUNNING");
-    if(player.state == ROLL) nuDebConPrintf(NU_DEB_CON_WINDOW0, "ROLL");
-    if(player.state == JUMP) nuDebConPrintf(NU_DEB_CON_WINDOW0, "JUMP");
     */
 }
 
@@ -466,15 +481,15 @@ void update_scene()
 
     set_entity_state(&player, player.state);  
 
-    //move_viewport_stick(&viewport, &contdata[1]);
-    move_viewport_c_buttons(&viewport, &contdata[0], timedata);
+    move_viewport_stick(&viewport, player, &contdata[1]);
+    //move_viewport_c_buttons(&viewport, &contdata[0], timedata);
 
     set_viewport_position(&viewport, player, timedata);
 
     set_capsule(&player_bounding_box, player, 20);
     //set_sphere(&player_bounding_box, player);
 
-    set_collissions(&player, player_bounding_box, axis_cube_bounding_box, cube_object_box);
+    set_collission_response(&player, player_bounding_box, axis_cube_bounding_box, cube_object_box);
     //rotate_cube();
 }
 

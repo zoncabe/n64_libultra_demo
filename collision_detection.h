@@ -12,9 +12,6 @@ typedef struct {
 
     float center[3];
     float radius;
-    
-    float closest_point[3];
-    float distance_squared;
 
 } Sphere;
 
@@ -85,6 +82,8 @@ int collision_cylinder_aabb(Entity* entity, Cylinder cylinder, AABB aabb);
 int collision_cylinder_obb(Entity* entity, Cylinder cylinder, OBB obb);
 int collision_capsule_aabb(Entity* entity, Capsule capsule, AABB aabb);
 int collision_capsule_obb(Entity* entity, Capsule capsule, OBB obb);
+int collision_ray_aabb(float origin[3], float direction[3], AABB aabb, float* hit_distance, float* hit_point);
+
 
 
 /* set_point
@@ -177,7 +176,7 @@ void set_vector(float *vector, float *a, float *b)
 {
     vector[0] = b[0] - a[0];
     vector[1] = b[1] - a[1];
-    vector[2] = b[2] - a[2];  // Corregido de vector[1] a vector[2]
+    vector[2] = b[2] - a[2]; 
 }
 
 
@@ -578,6 +577,59 @@ int collision_capsule_obb(Entity* entity, Capsule capsule, OBB obb)
     return collision_cylinder_obb(entity, cylinder, obb);
 }
 
+
+/* collision_ray_aabb checks if a ray intersects with an AABB and calculates the distance of the intersection.
+   returns 1 if there is an intersection, 0 otherwise. 
+   additionally calculates the precise hit point if an intersection is detected. */
+
+int collision_ray_aabb(float origin[3], float target[3], AABB aabb, float* hit_distance, float* hit_point)
+{
+    float len = qi_sqrt(pow(target[0] - origin[0], 2) + pow(target[1] - origin[1], 2) + pow(target[2] - origin[2], 2)); // I've inverted len so we can multiply instead of divide with it
+    float inverse_direction[3];
+    float t1[3], t2[3], tmin, tmax;
+
+    // Calculate inverse direction and handle division by zero for rays parallel to AABB planes
+    for (int i = 0; i < 3; i++) {
+        if (fabs(target[i] - origin[i]) < 0.001f) { // Avoid division by zero by checking if direction is almost parallel to the plane
+            if (origin[i] < aabb.min[i] || origin[i] > aabb.max[i]) return 0; // Ray is parallel and outside AABB, no intersection
+            inverse_direction[i] = FLT_MAX; // Use a large number to represent infinity
+        } else {
+            inverse_direction[i] = 1.0f / ((target[i] - origin[i])*len);
+        }
+    }
+
+    // Calculate intersections with the AABB planes
+    for (int i = 0; i < 3; i++) {
+        t1[i] = (aabb.min[i] - origin[i]) * inverse_direction[i];
+        t2[i] = (aabb.max[i] - origin[i]) * inverse_direction[i];
+
+        // Ensure t1 is the intersection with the near plane, and t2 with the far plane
+        if (t1[i] > t2[i]) {
+            float temp = t1[i];
+            t1[i] = t2[i];
+            t2[i] = temp;
+        }
+    }
+
+    // Find the largest tmin and the smallest tmax
+    tmin = max(max(t1[0], t1[1]), t1[2]);
+    tmax = min(min(t2[0], t2[1]), t2[2]);
+
+    // If tmax < tmin, ray doesn't intersect AABB
+    if (tmax < tmin) {
+        return 0;
+    }
+
+    // If there's an intersection, the hit distance is tmin (if tmin >= 0) or tmax (if tmin < 0 and thus the ray starts inside the AABB)
+    *hit_distance = (tmin >= 0.0f) ? tmin : tmax;
+
+    // Calculate the precise hit point using hit_distance
+    for (int i = 0; i < 3; i++) {
+        hit_point[i] = origin[i] + (target[i] - origin[i]) * len * (*hit_distance);
+    }
+
+    return 1;
+}
 
 
 #endif
