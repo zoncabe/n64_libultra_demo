@@ -10,8 +10,19 @@ here are all the structures and functions prototypes that involve the collision 
 
 typedef struct {
 
+    float normal[3];
+    float point[3];
+    float displacement; 
+
+} Plane;
+
+typedef struct {
+
     float center[3];
     float radius;
+    
+    float closest_point[3];
+    float distance_squared;
 
 } Sphere;
 
@@ -29,6 +40,8 @@ typedef struct {
     float min[3];
     float max[3];
     float center[3];
+
+    Plane plane;
 
 } AABB;
 
@@ -48,8 +61,9 @@ typedef struct {
     float size[3];
     float rotation[3];
 
-} OBB;
+    Plane plane;
 
+} OBB;
 
 
 // function prototypes
@@ -62,12 +76,18 @@ void rotate_point(float point[3], float rotation[3]);
 void set_vector(float *vector, float *a, float *b);
 float squared_length(const float* vector);
 float length(const float* vector);
+float inverse_length(const float* vector);
 
 void project_polygon(float axis[3], float corners[8][3], float *min, float *max);
 int intervals_overlap(float minA, float maxA, float minB, float maxB);
+int test_axis(float axis[3], float obbCorners[8][3], float aabbCorners[8][3]);
+
 void point_global_to_obb_space(OBB obb, float global_point[3], float local_point[3]);
+void point_obb_to_global_space(OBB obb, float local_point[3], float global_point[3]);
+
 void get_aabb_corners(AABB aabb, float corners[8][3]);
 void get_obb_corners(OBB obb, float corners[8][3]);
+
 void closest_point_on_segment_to_point(float line_start[3], float line_end[3], float point[3], float closest[3]);
 float squared_distance_point_to_segment(float point[3], float segment_start[3], float segment_end[3]);
 
@@ -82,8 +102,19 @@ int collision_cylinder_aabb(Entity* entity, Cylinder cylinder, AABB aabb);
 int collision_cylinder_obb(Entity* entity, Cylinder cylinder, OBB obb);
 int collision_capsule_aabb(Entity* entity, Capsule capsule, AABB aabb);
 int collision_capsule_obb(Entity* entity, Capsule capsule, OBB obb);
-int collision_ray_aabb(float origin[3], float direction[3], AABB aabb, float* hit_distance, float* hit_point);
+int collision_ray_aabb(float origin[3], float target[3], AABB aabb, float* hit_point);
 
+
+
+/* init_point
+sets initial values to a destinatary point */
+
+void init_point(float* dest, float x, float y, float z) 
+{
+    dest[0] = x;
+    dest[1] = y;
+    dest[2] = z;
+}
 
 
 /* set_point
@@ -169,6 +200,17 @@ void point_obb_to_global_space(OBB obb, float local_point[3], float global_point
 }
 
 
+/* null_vector
+sets a vector given 2 points */
+
+void null_vector(float* vector)
+{
+    vector[0] = 0;
+    vector[1] = 0;
+    vector[2] = 0; 
+}
+
+
 /* set_vector
 sets a vector given 2 points */
 
@@ -180,10 +222,21 @@ void set_vector(float *vector, float *a, float *b)
 }
 
 
+/* subtract_vector
+sets a vector given 2 points */
+
+void set_inverse_vector(float *vector, float *a, float *b)
+{
+    vector[0] = a[0] - b[0];
+    vector[1] = a[1] - b[1];
+    vector[2] = a[2] - b[2];
+}
+
 /* squared_lenght
 returns the squared lenght of a vector */
 
-float squared_length(const float* vector) {
+float squared_length(const float* vector) 
+{
     return vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2];
 }
 
@@ -191,10 +244,34 @@ float squared_length(const float* vector) {
 /* lenght
 returns the lenght of a vector */
 
-float length(const float* vector) {
+float length(const float* vector) 
+{
     return 1 / qi_sqrt(squared_length(vector));
 }
 
+/* inverse_lenght
+returns the lenght of a vector */
+
+float inverse_length(const float* vector) 
+{
+    return qi_sqrt(squared_length(vector));
+}
+
+
+/* normalize_vector
+normalize a vector */
+
+void normalize_vector(float* vector) 
+{
+    float inv_len = inverse_length(vector);
+
+    if (inv_len != 0) {
+
+        for (int i = 0; i < 3; i++) {
+            vector[i] *= inv_len;
+        }
+    }
+}
 
 /* project_polygon
 projects a 3D polygon onto an axis */
@@ -310,6 +387,17 @@ float squared_distance_point_to_segment(float point[3], float segment_start[3], 
     };
 
     return squared_distance(point, closest);
+}
+
+
+/* init_plane
+Function to initialize a plane given a point and a normal */
+
+void init_plane(Plane *plane, float normal[3], float point[3]) 
+{
+    set_point(plane->normal, normal);
+    set_point(plane->point, point);
+    plane->displacement = dot_product(plane->normal, plane->point);
 }
 
 
@@ -539,10 +627,10 @@ Detects collision between a capsule and an AABB */
 int collision_capsule_aabb(Entity* entity, Capsule capsule, AABB aabb)
 {
     // Check collision with spheres at the ends of the capsule
-    Sphere end_sphere1 = {.center = {capsule.start_point[0], capsule.start_point[1], capsule.start_point[2]}, .radius = capsule.radius};
-    Sphere end_sphere2 = {.center = {capsule.end_point[0], capsule.end_point[1], capsule.end_point[2]}, .radius = capsule.radius};
+    Sphere lower_sphere = {.center = {capsule.start_point[0], capsule.start_point[1], capsule.start_point[2]}, .radius = capsule.radius};
+    Sphere upper_sphere = {.center = {capsule.end_point[0], capsule.end_point[1], capsule.end_point[2]}, .radius = capsule.radius};
 
-    if (collision_sphere_aabb(entity, end_sphere1, aabb) || collision_sphere_aabb(entity, end_sphere2, aabb))
+    if (collision_sphere_aabb(entity, lower_sphere, aabb) || collision_sphere_aabb(entity, upper_sphere, aabb))
         return 1;  // Collision with one of the end spheres
 
     // Check collision with the cylindrical body
@@ -561,10 +649,10 @@ Detects collision between a capsule and an OBB */
 int collision_capsule_obb(Entity* entity, Capsule capsule, OBB obb)
 {
     // Check collision with spheres at the ends of the capsule
-    Sphere end_sphere1 = {.center = {capsule.start_point[0], capsule.start_point[1], capsule.start_point[2]}, .radius = capsule.radius};
-    Sphere end_sphere2 = {.center = {capsule.end_point[0], capsule.end_point[1], capsule.end_point[2]}, .radius = capsule.radius};
+    Sphere lower_sphere = {.center = {capsule.start_point[0], capsule.start_point[1], capsule.start_point[2]}, .radius = capsule.radius};
+    Sphere upper_sphere = {.center = {capsule.end_point[0], capsule.end_point[1], capsule.end_point[2]}, .radius = capsule.radius};
 
-    if (collision_sphere_obb(entity, end_sphere1, obb) || collision_sphere_obb(entity, end_sphere2, obb))
+    if (collision_sphere_obb(entity, lower_sphere, obb) || collision_sphere_obb(entity, upper_sphere, obb))
         return 1;  // Collision with one of the end spheres
 
     // Check collision with the cylindrical body
@@ -582,7 +670,7 @@ int collision_capsule_obb(Entity* entity, Capsule capsule, OBB obb)
    returns 1 if there is an intersection, 0 otherwise. 
    additionally calculates the precise hit point if an intersection is detected. */
 
-int collision_ray_aabb(float origin[3], float target[3], AABB aabb, float* hit_distance, float* hit_point)
+int collision_ray_aabb(float origin[3], float target[3], AABB aabb, float* hit_point)
 {
     float len = qi_sqrt(pow(target[0] - origin[0], 2) + pow(target[1] - origin[1], 2) + pow(target[2] - origin[2], 2)); // I've inverted len so we can multiply instead of divide with it
     float inverse_direction[3];
@@ -621,11 +709,11 @@ int collision_ray_aabb(float origin[3], float target[3], AABB aabb, float* hit_d
     }
 
     // If there's an intersection, the hit distance is tmin (if tmin >= 0) or tmax (if tmin < 0 and thus the ray starts inside the AABB)
-    *hit_distance = (tmin >= 0.0f) ? tmin : tmax;
+    float hit_distance = (tmin >= 0.0f) ? tmin : tmax;
 
     // Calculate the precise hit point using hit_distance
     for (int i = 0; i < 3; i++) {
-        hit_point[i] = origin[i] + (target[i] - origin[i]) * len * (*hit_distance);
+        hit_point[i] = origin[i] + (target[i] - origin[i]) * len * hit_distance;
     }
 
     return 1;

@@ -141,9 +141,9 @@ Scenery axis_cube[AXIS_COUNT] = {
     {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100, -100,   0}, rotation: {0,   0,  90}},
     {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100,  100,   0}, rotation: {0,   0, 180}},
     {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100,  100,   0}, rotation: {0,   0, 270}},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100,  50}, rotation: {0, 180,  90}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: { -100, -100,  50}, rotation: {0, 180, 270}},
     {model:        gfx_axis, scale: {1 ,1 ,1}, position: {  100, -100,  50}, rotation: {0, 180,   0}},
-    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100,  50}, rotation: {0, 180, 270}},
+    {model: gfx_mirror_axis, scale: {1 ,1 ,1}, position: {  100,  100,  50}, rotation: {0, 180,  90}},
     {model:        gfx_axis, scale: {1 ,1 ,1}, position: { -100,  100,  50}, rotation: {0, 180, 180}},
     
     
@@ -297,18 +297,17 @@ handles the system functions that enters an entity's position and rotation value
 
 void set_entity (Entity *entity)
 {
-    guTranslate(&entity->position_mtx, entity->position[0], entity->position[1], entity->position[2]);
-    guRotate(&entity->rotation_mtx[2], entity->yaw, 0, 0, 1);
-    guScale(&entity->scale_mtx, entity->scale, entity->scale, entity->scale);
+    guPosition(
+        &entity->transform,
+        entity->pitch, entity->roll, entity->yaw,
+        entity->scale,
+        entity->position[0], entity->position[1], entity->position[2]
+    );
 
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->rotation_mtx[2]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&entity->transform), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
 
     sausage64_drawmodel(&glistp, &entity->model);
 
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 }
 
@@ -318,25 +317,23 @@ handles the system functions that enters a scenery object's position and rotatio
 
 void set_scenery (Scenery *scenery)
 {
-    guTranslate(&scenery->position_mtx, scenery->position[0], scenery->position[1], scenery->position[2]);
-    guRotate(&scenery->rotation_mtx[0], scenery->rotation[0], 1, 0, 0);
-    guRotate(&scenery->rotation_mtx[1], scenery->rotation[1], 0, 1, 0);
-    guRotate(&scenery->rotation_mtx[2], scenery->rotation[2], 0, 0, 1);
+
+    guPosition(
+        &scenery->transform,
+        scenery->rotation[0], scenery->rotation[1], scenery->rotation[2],
+        1,
+        scenery->position[0], scenery->position[1], scenery->position[2]
+    );
+    
     guScale(&scenery->scale_mtx, scenery->scale[0], scenery->scale[1], scenery->scale[2]);
 
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->position_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[0]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[1]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->rotation_mtx[2]), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->transform), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&scenery->scale_mtx), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
 
     gSPDisplayList(glistp++, scenery->model);
 
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-     gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 }
 
 
@@ -386,27 +383,25 @@ sets debug information to be printed on screen */
 void print_debug_data()
 {
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
-    nuDebConPrintf(NU_DEB_CON_WINDOW0, "position: %d, %d, %d", (int)player.position[0], (int)player.position[1], (int)player.position[2]);
-
-    float hit_distance, hit_point[3];
-
-    if(collision_ray_aabb(viewport.position, viewport.target, axis_cube_bounding_box, &hit_distance, hit_point)) {
-
-        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
-        nuDebConPrintf(NU_DEB_CON_WINDOW0, "ray hit distance %d", (int)(hit_distance) );
-
-        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
-        nuDebConPrintf(NU_DEB_CON_WINDOW0, "ray hit point %d, %d, %d", (int)(hit_point[0]), (int)(hit_point[1]), (int)(hit_point[2]) );
-    }
-
-   
-    /*
-
-        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 1);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "time  %d", (int) get_time());
     
     nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "FPS  %d", (int) timedata.FPS);
+    
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 3);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "position: %d, %d, %d", (int)player.position[0], (int)player.position[1], (int)player.position[2]);
+
+    nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
+    nuDebConPrintf(NU_DEB_CON_WINDOW0, "normal: %d, %d, %d", (int)(player.collision.normal[0] * 1000), (int)(player.collision.normal[1] * 1000), (int)(player.collision.normal[2] * 1000));
+
+    /*
+    float hit_point[3];
+
+    if(collision_ray_aabb(viewport.position, viewport.target, axis_cube_bounding_box, hit_point)) {
+
+        nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 2);
+        nuDebConPrintf(NU_DEB_CON_WINDOW0, "ray hit point %d, %d, %d", (int)(hit_point[0]), (int)(hit_point[1]), (int)(hit_point[2]) );
+    }
 
      nuDebConTextPos(NU_DEB_CON_WINDOW0, 1, 4);
     nuDebConPrintf(NU_DEB_CON_WINDOW0, "collision normal: %d, %d, %d", (int)(player.collision.normal[0] * 1000 ), (int)(player.collision.normal[1] * 1000 ), (int)(player.collision.normal[2] * 1000 ));
