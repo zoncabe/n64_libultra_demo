@@ -22,6 +22,8 @@
     #define USB_THREAD_PRI   126
     #define USB_THREAD_STACK 0x2000
     
+    #define USB_BUFFER_SIZE 256
+    
     
     /*********************************
              Debug Functions

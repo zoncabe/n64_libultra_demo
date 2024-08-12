@@ -5,9 +5,9 @@ Program entrypoint.
 ***************************************************************/
 
 #include <nusys.h>
-#include "config.h"
-#include "main.h"
-#include "debug.h"
+#include "config/config.h"
+#include "scene/scene.h"
+#include "debug/debug.h"
 
 
 /*********************************
@@ -19,6 +19,35 @@ static void callback_vsync(int tasksleft);
 
 // Controller data
 NUContData contdata[2];
+
+
+/*==============================
+    callback_vsync
+    Code that runs on on the graphics
+    thread
+    @param The number of tasks left to execute
+==============================*/
+
+static void callback_vsync(int tasksleft)
+{
+    // Update the stage, then draw it when the RDP is ready
+    scene_update();
+    if (tasksleft < 1)
+        scene_draw();
+}
+
+
+/*==============================
+    callback_prenmi
+    Code that runs when the reset button
+    is pressed. Required to prevent crashes
+==============================*/
+
+static void callback_prenmi()
+{
+    nuGfxDisplayOff();
+    osViSetYScale(1);
+}
 
 
 /*==============================
@@ -48,42 +77,13 @@ void mainproc(void)
     nuContInit();
         
     // Initialize the scene
-    init_scene();
+    scene_init();
         
     // Set callback functions for reset and graphics
     nuGfxFuncSet((NUGfxFunc)callback_vsync);
     
     // Turn on the screen and loop forever to keep the idle thread busy
+
     nuGfxDisplayOn();
-    while(1)
-        ;
-}
-
-
-/*==============================
-    callback_vsync
-    Code that runs on on the graphics
-    thread
-    @param The number of tasks left to execute
-==============================*/
-
-static void callback_vsync(int tasksleft)
-{
-    // Update the stage, then draw it when the RDP is ready
-    update_scene();
-    if (tasksleft < 1)
-        render_frame();
-}
-
-
-/*==============================
-    callback_prenmi
-    Code that runs when the reset button
-    is pressed. Required to prevent crashes
-==============================*/
-
-static void callback_prenmi()
-{
-    nuGfxDisplayOff();
-    osViSetYScale(1);
+    while(1);
 }

@@ -12,7 +12,7 @@
               Models
 *********************************/
 
-static Vtx vtx_n64_logo[] = {
+static Vtx vtx_n64_logo_mesh[] = {
     {-49, 21, 0, 0, 0, 0, -67, -67, 85, 255}, /* 0 */
     {-29, 0, 0, 0, 0, 0, -67, -67, 85, 255}, /* 1 */
     {0, 29, 45, 0, 0, 0, -67, -67, 85, 255}, /* 2 */
@@ -151,8 +151,8 @@ static Vtx vtx_n64_logo[] = {
     {0, 70, -45, 0, 0, 0, 0, 0, -127, 255}, /* 135 */
 };
 
-static Gfx gfx_n64_logo[] = {
-    gsSPVertex(vtx_n64_logo+0, 32, 0),
+static Gfx gfx_n64_logo_mesh[] = {
+    gsSPVertex(vtx_n64_logo_mesh+0, 32, 0),
     gsDPSetCycleType(G_CYC_1CYCLE),
     gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
     gsDPSetCombineMode(G_CC_PRIMLITE, G_CC_PRIMLITE),
@@ -174,13 +174,13 @@ static Gfx gfx_n64_logo[] = {
     gsSP2Triangles(27, 28, 25, 0, 27, 29, 28, 0),
     gsSP2Triangles(27, 30, 29, 0, 29, 31, 28, 0),
 
-    gsSPVertex(vtx_n64_logo+32, 12, 0),
+    gsSPVertex(vtx_n64_logo_mesh+32, 12, 0),
     gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
     gsSP2Triangles(4, 2, 1, 0, 4, 5, 2, 0),
     gsSP2Triangles(4, 6, 5, 0, 4, 7, 6, 0),
     gsSP2Triangles(8, 9, 10, 0, 8, 11, 9, 0),
 
-    gsSPVertex(vtx_n64_logo+44, 32, 0),
+    gsSPVertex(vtx_n64_logo_mesh+44, 32, 0),
     gsDPSetPrimColor(0, 0, 1, 0, 154, 255),
     gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
     gsSP2Triangles(4, 5, 6, 0, 7, 6, 5, 0),
@@ -195,20 +195,20 @@ static Gfx gfx_n64_logo[] = {
     gsSP2Triangles(28, 25, 23, 0, 28, 29, 25, 0),
     gsSP2Triangles(28, 30, 29, 0, 29, 31, 25, 0),
 
-    gsSPVertex(vtx_n64_logo+76, 12, 0),
+    gsSPVertex(vtx_n64_logo_mesh+76, 12, 0),
     gsSP2Triangles(0, 1, 2, 0, 3, 2, 1, 0),
     gsSP2Triangles(3, 1, 4, 0, 0, 5, 1, 0),
     gsSP2Triangles(6, 5, 0, 0, 6, 0, 7, 0),
     gsSP2Triangles(8, 9, 10, 0, 8, 10, 11, 0),
 
-    gsSPVertex(vtx_n64_logo+88, 16, 0),
+    gsSPVertex(vtx_n64_logo_mesh+88, 16, 0),
     gsDPSetPrimColor(0, 0, 225, 9, 22, 255),
     gsSP2Triangles(0, 1, 2, 0, 3, 0, 2, 0),
     gsSP2Triangles(4, 5, 6, 0, 7, 4, 6, 0),
     gsSP2Triangles(8, 9, 10, 0, 8, 11, 9, 0),
     gsSP2Triangles(12, 13, 14, 0, 12, 14, 15, 0),
 
-    gsSPVertex(vtx_n64_logo+104, 32, 0),
+    gsSPVertex(vtx_n64_logo_mesh+104, 32, 0),
     gsDPSetPrimColor(0, 0, 245, 178, 1, 255),
     gsSP2Triangles(0, 1, 2, 0, 3, 4, 5, 0),
     gsSP2Triangles(6, 7, 8, 0, 0, 2, 9, 0),

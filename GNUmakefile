@@ -12,13 +12,13 @@
 BUILDDIR    = build
 ASMFILES    = asm/entry.s asm/rom_header.s
 ASMOBJECTS  = $(ASMFILES:%.s=${BUILDDIR}/%.o)
-CODECFILES  = main.c graphic.c helper.c scene.c sausage/sausage64.c
+CODECFILES  = main.c config/config.c scene/scene.c
 CODEHFILES  =
 
 DEBUGFILES = debug/debug.c debug/usb.c
 
 ELF		= ${BUILDDIR}/game.elf
-TARGETS	= ${BUILDDIR}/game.z64
+TARGETS	= game.z64
 MAP		= ${BUILDDIR}/game.map
 
 LD_SCRIPT	 = game.ld
@@ -81,7 +81,7 @@ endif
 #                        Linker Settings                       #
 ################################################################
 
-LCINCS  = -I. -I./debug -I./sausage -I./assets -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
+LCINCS  = -I. -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
 LCOPTS  = -G 0
 LDIRT   = $(ELF) $(CP_LD_SCRIPT) $(TARGETS) $(MAP) $(ASMOBJECTS)
 LDFLAGS = $(MKDEPOPT) -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) $(N64LIB) -L$(N64_LIBGCCDIR) -lgcc -lnustd -g
@@ -119,5 +119,11 @@ $(TARGETS): $(OBJECTS) $(CP_LD_SCRIPT)
 $(BUILDDIR):
 	mkdir -p $@
 	mkdir -p $@/asm
+	mkdir -p $@/assets
+	mkdir -p $@/camera
 	mkdir -p $@/debug
-	mkdir -p $@/sausage
+	mkdir -p $@/config
+	mkdir -p $@/physics
+	mkdir -p $@/physics/math
+	mkdir -p $@/physics/body
+	mkdir -p $@/scene
