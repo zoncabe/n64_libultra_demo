@@ -12,6 +12,7 @@ typedef enum {
 } CameraState;
 
 typedef struct {
+
 	float orbitational_acceleration_rate;
 	Vector2 orbitational_max_velocity;
 
@@ -36,6 +37,7 @@ typedef struct {
 } CameraSettings;
 
 typedef struct {
+
 	Mtx modeling;
 
 	u16 normal;
