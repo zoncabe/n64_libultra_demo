@@ -6,6 +6,15 @@
         "helper.h": "c",
         "config.h": "c",
         "iterator": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "random": "c",
+        "limits": "c",
+        "algorithm": "c",
+        "*.tcc": "cpp",
+        "pfgen,h": "c"
     }
 }

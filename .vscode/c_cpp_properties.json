@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/home/zonca/Programacion/engine64/rom",
                 "/usr/include/n64",
-                "/usr/include/n64/nusys"
+                "/usr/include/n64/nusys",
+                "${workspaceFolder}/physics"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

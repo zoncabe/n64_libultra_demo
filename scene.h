@@ -7,8 +7,6 @@ here are all the structures and functions prototypes that involve the setting up
 
 // macros
 
-#define USB_BUFFER_SIZE 256
-
 #define GRAVITY 1000
 
 
@@ -37,7 +35,9 @@ typedef struct {
 
 typedef struct {
 
-	Mtx	transform;
+	Mtx transform_mtx;
+	Mtx	position_mtx;
+	Mtx rotation_mtx[3];
 	Mtx scale_mtx;
 
 	float scale[3];

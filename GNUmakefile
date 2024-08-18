@@ -81,7 +81,7 @@ endif
 #                        Linker Settings                       #
 ################################################################
 
-LCINCS  = -I. -I./debug -I./sausage -I./assets -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
+LCINCS  = -I. -I./physics -I./debug -I./sausage -I./assets -I$(ROOT)/usr/include/PR -I $(ROOT)/usr/include -I$(NUSYSINC) -I $(ROOT)/usr/include/nustd
 LCOPTS  = -G 0
 LDIRT   = $(ELF) $(CP_LD_SCRIPT) $(TARGETS) $(MAP) $(ASMOBJECTS)
 LDFLAGS = $(MKDEPOPT) -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) $(N64LIB) -L$(N64_LIBGCCDIR) -lgcc -lnustd -g
